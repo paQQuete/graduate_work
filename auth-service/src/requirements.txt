@@ -2,7 +2,7 @@ Flask==2.2.2
 gevent==22.10.1
 flask-jwt-extended[asymmetric_crypto]==4.4.4
 SQLAlchemy==1.4.42
-psycopg2-binary==2.9.4
+psycopg2-binary==2.9.6
 alembic==1.8.1
 python-dotenv==0.21.0
 pydantic==1.10.2
