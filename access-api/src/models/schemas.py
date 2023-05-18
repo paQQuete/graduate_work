@@ -5,6 +5,8 @@ from enum import Enum
 import orjson
 from pydantic import BaseModel
 
+from .models import TypesEnum
+
 
 def orjson_dumps(v, *, default):
     return orjson.dumps(v, default=default).decode()
@@ -16,15 +18,9 @@ class BaseOrjsonModel(BaseModel):
         json_dumps = orjson_dumps
 
 
-class TypesEnum(str, Enum):
-    topup = 'topup'
-    spending = 'spending'
-    refund = 'refund'
-
-
 class TransactionBase(BaseOrjsonModel):
     user_uuid: uuid.UUID
-    type: list[TypesEnum]
+    type: TypesEnum
     cost: int
     timestamp: datetime.datetime
 
@@ -38,4 +34,3 @@ class Transaction(TransactionBase):
 
     class Config:
         orm_mode = True
-        

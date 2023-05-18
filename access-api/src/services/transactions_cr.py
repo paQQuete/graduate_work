@@ -20,6 +20,7 @@ def create_transaction(db: Session, transaction: schemas.TransactionCreate):
     db.add(db_trans)
     db.commit()
     db.refresh(db_trans)
+    # db_trans.type = db_trans.type.name
     return db_trans
 
 

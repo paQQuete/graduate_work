@@ -5,15 +5,12 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 import sentry_sdk
 
-from api.v1 import bookmarks
+from api.v1 import transactions
 from core import config
 from core.logger import LOGGING
 
-
-
 sentry_sdk.init(
     dsn="https://d7b229275c864cb9aa5d7a3b7f2ac257@o4504634582302720.ingest.sentry.io/4504662476390400")
-
 
 app = FastAPI(
     title=config.Settings().PROJECT_NAME,
@@ -25,19 +22,15 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    kafka.producer = aiokafka.AIOKafkaProducer(bootstrap_servers=config.Settings().KAFKA_SERVER)
-    await kafka.producer.start()
+    pass
 
 
 @app.on_event('shutdown')
 async def shutdown():
-    await kafka.producer.stop()
+    pass
 
 
-app.include_router(views.router, prefix='/api/v1/views', tags=['views'])
-app.include_router(bookmarks.router, prefix='/api/v1/bookmarks', tags=['bookmarks'])
-app.include_router(likes.router, prefix='/api/v1/likes', tags=['likes'])
-app.include_router(reviews.router, prefix='/api/v1/reviews', tags=['reviews'])
+app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['bookmarks'])
 
 if __name__ == '__main__':
     # Приложение может запускаться командой
