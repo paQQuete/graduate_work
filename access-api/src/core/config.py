@@ -3,7 +3,7 @@ from logging import config as logging_config
 
 from dotenv import load_dotenv
 from pydantic import BaseSettings
-from logger import LOGGING
+from .logger import LOGGING
 
 DEBUG = True
 if DEBUG:
@@ -18,6 +18,9 @@ class DatabaseDSN(BaseSettings):
     BILLING_DB: str
     DB_USER: str
     DB_PASSWORD: str
+
+    class Config:
+        env_file = '.env'
 
 
 class Settings(BaseSettings):
@@ -34,3 +37,8 @@ class Settings(BaseSettings):
 
 
 SETTINGS = Settings()
+
+# with open('../alembic.ini', mode='w') as f:
+#     conf = f.read()
+#     conf = conf.replace('{{sqlalchemy.url}}', f'sqlalchemy.url = {SETTINGS.SQLALCHEMY_DATABASE_URL}')
+#     f.write(conf)
