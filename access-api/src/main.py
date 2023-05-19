@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 import sentry_sdk
 
-from api.v1 import transactions
+from api.v1 import transactions, balance
 from core import config
 from core.logger import LOGGING
 
@@ -30,7 +30,8 @@ async def shutdown():
     pass
 
 
-app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['bookmarks'])
+app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['transactions'])
+app.include_router(balance.router, prefix='/api/v1/balance', tags=['balance'])
 
 if __name__ == '__main__':
     # Приложение может запускаться командой
