@@ -1,12 +1,8 @@
 import uuid
 
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import NoResultFound
 
 from models import models, schemas
-
-
-# TODO: определить все допустимые операции записи и чтения для транзакций тут!
 
 
 def create_transaction(db: Session, transaction: schemas.TransactionCreate):
@@ -20,7 +16,6 @@ def create_transaction(db: Session, transaction: schemas.TransactionCreate):
     db.add(db_trans)
     db.commit()
     db.refresh(db_trans)
-    # db_trans.type = db_trans.type.name
     return db_trans
 
 
@@ -45,4 +40,3 @@ def read_by_user(db: Session, user_uuid: uuid.UUID, skip: int, limit: int = 50):
     '''
     return db.query(models.Transaction).filter(models.Transaction.user_uuid == str(user_uuid)). \
         offset(skip).limit(limit).all()
-
