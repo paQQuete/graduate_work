@@ -2,10 +2,11 @@ import uuid
 
 from sqlalchemy.orm import Session
 
-from models import models, schemas
+from models import models
+from models.schemas.transaction import TransactionCreate
 
 
-def create_transaction(db: Session, transaction: schemas.TransactionCreate):
+def create_transaction(db: Session, transaction: TransactionCreate):
     '''
     Create one transaction
     :param db: sqlalchemy.orm.Session instance
