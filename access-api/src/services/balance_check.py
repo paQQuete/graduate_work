@@ -20,6 +20,7 @@ def aggregate(db: Session, user_uuid: uuid.UUID) -> int:
     holds_list = db.query(FundsOnHold).filter(FundsOnHold.user_uuid == str(user_uuid)).all()
 
     transactions = list(map(lambda x: x.as_dict, transactions_list)) + list(map(lambda x: x.as_dict, holds_list))
+    transactions = (x.as_dict for x in transactions_list) #generator comphr
 
     for trans in transactions:
         balance += trans['cost']

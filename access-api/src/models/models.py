@@ -58,3 +58,9 @@ class FundsOnHold(DefaultMixin, TransactionBase, Base):
     __table_args__ = {"schema": "billing"}
 
     type = Column(Enum(TypesEnumHolds), index=True, nullable=False)
+
+
+# TODO
+#     + еще одна модель с объектами созданных заказов,
+#     (user id, payment session id ..., subscribe id)
+#

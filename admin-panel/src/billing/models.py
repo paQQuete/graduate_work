@@ -62,3 +62,58 @@ class SubscriptionFilmwork(UUIDMixin):
         indexes = [
             models.Index(fields=['subscription_id', 'filmwork_id'], name='subscription_filmwork_idx')
         ]
+
+
+class UnmanagedMixin(models.Model):
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        raise NotImplementedError("This model is read-only")
+
+    def delete(self, *args, **kwargs):
+        raise NotImplementedError("This model is read-only")
+
+
+class TransactionMixin(models.Model):
+    user_uuid = models.UUIDField(editable=False, verbose_name=_('User id'))
+    cost = models.IntegerField(verbose_name=_('Transaction amount'))
+    timestamp = models.DateTimeField(verbose_name=_('Transaction complete date'))
+
+    class Meta:
+        abstract = True
+
+
+class Transaction(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+    class TypeEnum(models.TextChoices):
+        topup = 'topup', _('Top up')
+        spending = 'spending', _('Spending')
+        refund = 'refund', _('Refund')
+
+    type = models.TextField(choices=TypeEnum.choices, verbose_name=_('Transaction type'))
+
+    class Meta:
+        managed = False
+        db_table = 'billing\".\"transaction'
+
+
+class FundsOnHold(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+    class TypeEnum(models.TextChoices):
+        spending = 'spending', _('Spending')
+        refund = 'refund', _('Refund')
+
+    type = models.TextField(choices=TypeEnum.choices, verbose_name=_('Hold type'))
+
+    class Meta:
+        managed = False
+        db_table = 'billing\".\"funds_hold'
+
+
+class Balance(UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+    user_uuid = models.UUIDField(verbose_name=_('User id'))
+    balance = models.IntegerField(verbose_name=_('User balance'))
+    timestamp_offset = models.DateTimeField(verbose_name=_('Actual balance time'))
+
+    class Meta:
+        managed = False
+        db_table = 'billing\".\"balance'
