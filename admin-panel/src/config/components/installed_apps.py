@@ -6,6 +6,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'movies.apps.MoviesConfig',
+    'billing.apps.BillingConfig',
     'debug_toolbar',
     'django_extensions',
     'corsheaders',

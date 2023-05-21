@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 /auth-service/.env
 /access-api/.env
+/admin-panel/src/config/.env
