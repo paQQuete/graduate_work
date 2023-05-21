@@ -33,9 +33,9 @@ class Subscription(UUIDMixin, TimeStampedMixin):
 
     name = models.CharField(verbose_name=_('Name'), max_length=255, null=False, blank=False)
     description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
-    periodic_type = models.TextField(choices=SubscriptionType, blank=False, null=False)
+    periodic_type = models.TextField(choices=SubscriptionType.choices, blank=False, null=False)
     cost = models.IntegerField(verbose_name=_('Subscribe price'), blank=False, null=False)
-    charge_type = models.TextField(choices=ChargeType, blank=False, null=False)
+    charge_type = models.TextField(choices=ChargeType.choices, blank=False, null=False)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='subscriptions_created')
 
     def __str__(self):
