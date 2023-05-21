@@ -22,6 +22,13 @@ class UUIDMixin(models.Model):
         abstract = True
 
 
+class UUIDMixinBilling(models.Model):
+    uuid = models.UUIDField(db_column='uuid', primary_key=True, default=uuid.uuid4, editable=False)
+
+    class Meta:
+        abstract = True
+
+
 class Subscription(UUIDMixin, TimeStampedMixin):
     class SubscriptionType(models.TextChoices):
         one = 'one', _('One')
@@ -84,7 +91,7 @@ class TransactionMixin(models.Model):
         abstract = True
 
 
-class Transaction(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+class Transaction(TransactionMixin, UUIDMixinBilling, TimeStampedMixin, UnmanagedMixin):
     class TypeEnum(models.TextChoices):
         topup = 'topup', _('Top up')
         spending = 'spending', _('Spending')
@@ -95,9 +102,11 @@ class Transaction(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin)
     class Meta:
         managed = False
         db_table = 'billing\".\"transaction'
+        verbose_name = _('Transaction (read-only)')
+        verbose_name_plural = _('Transactions (read-only)')
 
 
-class FundsOnHold(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+class FundsOnHold(TransactionMixin, UUIDMixinBilling, TimeStampedMixin, UnmanagedMixin):
     class TypeEnum(models.TextChoices):
         spending = 'spending', _('Spending')
         refund = 'refund', _('Refund')
@@ -107,9 +116,11 @@ class FundsOnHold(TransactionMixin, UUIDMixin, TimeStampedMixin, UnmanagedMixin)
     class Meta:
         managed = False
         db_table = 'billing\".\"funds_hold'
+        verbose_name = _('Fund on hold (read-only)')
+        verbose_name_plural = _('Funds on hold (read-only)')
 
 
-class Balance(UUIDMixin, TimeStampedMixin, UnmanagedMixin):
+class Balance(UUIDMixinBilling, TimeStampedMixin, UnmanagedMixin):
     user_uuid = models.UUIDField(verbose_name=_('User id'))
     balance = models.IntegerField(verbose_name=_('User balance'))
     timestamp_offset = models.DateTimeField(verbose_name=_('Actual balance time'))
@@ -117,3 +128,5 @@ class Balance(UUIDMixin, TimeStampedMixin, UnmanagedMixin):
     class Meta:
         managed = False
         db_table = 'billing\".\"balance'
+        verbose_name = _('User balance')
+        verbose_name_plural = _('Users balances')

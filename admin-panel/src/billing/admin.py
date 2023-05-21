@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from billing.models import Subscription, SubscriptionFilmwork
-from movies.models import Filmwork
+from billing.models import Subscription, SubscriptionFilmwork, Transaction, FundsOnHold, Balance
 
 
 class FilmworkSubscriptionInline(admin.TabularInline):
@@ -15,9 +14,25 @@ class SubscriptionAdmin(admin.ModelAdmin):
     readonly_fields = ('created_by',)
     list_display = ('name', 'periodic_type', 'cost', 'charge_type')
     inlines = (FilmworkSubscriptionInline,)
-    search_fields = ('name', )
+    search_fields = ('name',)
 
     def save_model(self, request, obj, form, change):
         if not change:  # if the object is being created, set created_by
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    readonly_fields = ('uuid', 'user_uuid', 'cost', 'timestamp', 'type')
+
+
+@admin.register(FundsOnHold)
+class FundsOnHoldAdmin(admin.ModelAdmin):
+    readonly_fields = ('uuid', 'user_uuid', 'cost', 'timestamp', 'type')
+
+
+@admin.register(Balance)
+class BalanceAdmin(admin.ModelAdmin):
+    readonly_fields = ('uuid', 'user_uuid', 'balance', 'timestamp_offset')
+    search_fields = ('user_uuid', 'timestamp_offset')

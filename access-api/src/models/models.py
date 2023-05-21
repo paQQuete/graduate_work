@@ -2,9 +2,7 @@ import datetime
 import uuid
 import enum
 
-from sqlalchemy import Enum
-from sqlalchemy import Column, Integer, DateTime
-from sqlalchemy_utils.types.choice import ChoiceType
+from sqlalchemy import Column, Integer, DateTime, Enum, String
 from sqlalchemy_utils.types.uuid import UUIDType
 
 from db.database import Base
@@ -64,3 +62,12 @@ class FundsOnHold(DefaultMixin, TransactionBase, Base):
 #     + еще одна модель с объектами созданных заказов,
 #     (user id, payment session id ..., subscribe id)
 #
+
+class TrasnactionOrder(DefaultMixin, Base):
+    __tablename__ = "trans_order"
+    __table_args__ = {"schema": "billing"}
+
+    user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
+    payment_session_id = Column(String, index=True, nullable=False)
+    subscribe_id = Column(UUIDType(binary=False), index=True, nullable=False)
+
