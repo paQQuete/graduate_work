@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Genre, Person, Filmwork, GenreFilmwork, PersonFilmwork
+from billing.models import SubscriptionFilmwork
 
 
 @admin.register(Genre)
@@ -17,15 +18,18 @@ class PersonFilmworkInline(admin.TabularInline):
     autocomplete_fields = ['person_id']
 
 
+class SubscriptionFilmworkInline(admin.TabularInline):
+    model = SubscriptionFilmwork
+    autocomplete_fields = ['subscription_id']
+
+
 @admin.register(Filmwork)
 class FilmworkAdmin(admin.ModelAdmin):
-    inlines = (GenreFilmworkInline, PersonFilmworkInline)
+    inlines = (GenreFilmworkInline, PersonFilmworkInline, SubscriptionFilmworkInline)
 
     list_display = ('title', 'type', 'creation_date', 'rating')
-
 
 
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     search_fields = ['person']
-
