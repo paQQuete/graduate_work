@@ -2,6 +2,7 @@
 real-time balance aggregation
 """
 import uuid
+from itertools import chain
 
 from sqlalchemy.orm import Session
 
@@ -15,14 +16,13 @@ def aggregate(db: Session, user_uuid: uuid.UUID) -> int:
     :param user_uuid: uuid of target
     :return: actual balance
     """
-    balance = int()
-    transactions_list = db.query(Transaction).filter(Transaction.user_uuid == str(user_uuid)).all()
-    holds_list = db.query(FundsOnHold).filter(FundsOnHold.user_uuid == str(user_uuid)).all()
+    def transactions_generator():
+        transactions_query = db.query(Transaction).filter(Transaction.user_uuid == str(user_uuid)).yield_per(200)
+        holds_query = db.query(FundsOnHold).filter(FundsOnHold.user_uuid == str(user_uuid)).yield_per(200)
 
-    transactions = list(map(lambda x: x.as_dict, transactions_list)) + list(map(lambda x: x.as_dict, holds_list))
-    transactions = (x.as_dict for x in transactions_list) #generator comphr
+        for transaction in chain(transactions_query, holds_query):
+            yield transaction.as_dict
 
-    for trans in transactions:
-        balance += trans['cost']
+    balance = sum(trans['cost'] for trans in transactions_generator())
 
     return balance
