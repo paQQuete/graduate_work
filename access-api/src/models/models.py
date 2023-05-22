@@ -70,4 +70,5 @@ class TrasnactionOrder(DefaultMixin, Base):
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     payment_session_id = Column(String, index=True, nullable=False)
     subscribe_id = Column(UUIDType(binary=False), index=True, nullable=False)
-
+    started_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    ended_at = Column(DateTime, nullable=True)
