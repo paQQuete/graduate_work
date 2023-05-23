@@ -2,8 +2,9 @@ import datetime
 import uuid
 import enum
 
-from sqlalchemy import Column, Integer, DateTime, Enum, String
+from sqlalchemy import Column, Integer, DateTime, Enum, String, ForeignKey
 from sqlalchemy_utils.types.uuid import UUIDType
+from sqlalchemy.orm import relationship
 
 from db.database import Base
 
@@ -58,11 +59,6 @@ class FundsOnHold(DefaultMixin, TransactionBase, Base):
     type = Column(Enum(TypesEnumHolds), index=True, nullable=False)
 
 
-# TODO
-#     + еще одна модель с объектами созданных заказов,
-#     (user id, payment session id ..., subscribe id)
-#
-
 class TrasnactionOrder(DefaultMixin, Base):
     __tablename__ = "trans_order"
     __table_args__ = {"schema": "billing"}
@@ -72,3 +68,54 @@ class TrasnactionOrder(DefaultMixin, Base):
     subscribe_id = Column(UUIDType(binary=False), index=True, nullable=False)
     started_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
     ended_at = Column(DateTime, nullable=True)
+
+
+class Subscription(Base):
+    __tablename__ = "subscribe"
+    __table_args__ = {"schema": "content"}
+
+    id = Column(UUIDType(binary=False), primary_key=True)
+    name = Column(String)
+    description = Column(String)
+    periodic_type = Column(String)
+    cost = Column(Integer)
+    charge_type = Column(String)
+    created_by = Column(String)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+
+    grants = relationship('GrantedAccesses', back_populates='subscription')
+
+    @property
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def _disallow_modification(self, *args, **kwargs):
+        raise NotImplementedError("Cannot modify a read-only instance")
+
+    __setattr__ = _disallow_modification
+    __delattr__ = _disallow_modification
+
+
+class GrantedAccess(DefaultMixin, Base):
+    __tablename__ = "granted_access"
+    __table_args__ = {"schema": "billing"}
+
+    user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
+    subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'))
+    granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    available_until = Column(DateTime, nullable=False)
+
+    films = relationship('GrantedFilms', back_populates='grant')
+    subscribe = relationship('Subscription', back_populates='grants')
+
+
+class GrantedFilms(DefaultMixin, Base):
+    __tablename__ = "granted_films"
+    __table_args__ = {"schema": "billing"}
+
+    movie_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
+    granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
+    grant_uuid = Column(UUIDType(binary=False), ForeignKey('billing.granted_access.uuid', ondelete='CASCADE'), nullable=False)
+
+    grant = relationship('GrantedAccess', back_populates='films')
