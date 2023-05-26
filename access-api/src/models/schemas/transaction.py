@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from models.schemas.base import BaseSchemaModel
+from models.schemas.base import BaseSchemaModel, BaseFullModelMixin
 from models.models import TypesEnum
 
 
@@ -16,7 +16,7 @@ class TransactionCreate(TransactionBase):
     pass
 
 
-class Transaction(TransactionBase):
+class Transaction(TransactionBase, BaseFullModelMixin):
     uuid: uuid.UUID
 
     class Config:

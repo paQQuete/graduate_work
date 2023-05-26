@@ -2,7 +2,7 @@ import datetime
 import uuid
 import enum
 
-from sqlalchemy import Column, Integer, DateTime, Enum, String, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, Enum, String, ForeignKey, Float
 from sqlalchemy_utils.types.uuid import UUIDType
 from sqlalchemy.orm import relationship
 
@@ -13,6 +13,16 @@ class DefaultMixin:
     uuid = Column(UUIDType(binary=False), primary_key=True, index=True, default=uuid.uuid4())
     created_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
     updated_at = Column(DateTime, nullable=True)
+
+    @property
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+class DefaultReadOnlyMixin:
+    id = Column(UUIDType(binary=False), primary_key=True)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
     @property
     def as_dict(self):
@@ -70,33 +80,6 @@ class TrasnactionOrder(DefaultMixin, Base):
     ended_at = Column(DateTime, nullable=True)
 
 
-class Subscription(Base):
-    __tablename__ = "subscribe"
-    __table_args__ = {"schema": "content"}
-
-    id = Column(UUIDType(binary=False), primary_key=True)
-    name = Column(String)
-    description = Column(String)
-    periodic_type = Column(String)
-    cost = Column(Integer)
-    charge_type = Column(String)
-    created_by = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
-
-    grants = relationship('GrantedAccesses', back_populates='subscription')
-
-    @property
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    def _disallow_modification(self, *args, **kwargs):
-        raise NotImplementedError("Cannot modify a read-only instance")
-
-    __setattr__ = _disallow_modification
-    __delattr__ = _disallow_modification
-
-
 class GrantedAccess(DefaultMixin, Base):
     __tablename__ = "granted_access"
     __table_args__ = {"schema": "billing"}
@@ -107,7 +90,7 @@ class GrantedAccess(DefaultMixin, Base):
     available_until = Column(DateTime, nullable=False)
 
     films = relationship('GrantedFilms', back_populates='grant')
-    subscribe = relationship('Subscription', back_populates='grants')
+    subscription = relationship('Subscription', back_populates='grants')
 
 
 class GrantedFilms(DefaultMixin, Base):
@@ -116,6 +99,73 @@ class GrantedFilms(DefaultMixin, Base):
 
     movie_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
-    grant_uuid = Column(UUIDType(binary=False), ForeignKey('billing.granted_access.uuid', ondelete='CASCADE'), nullable=False)
+    grant_uuid = Column(UUIDType(binary=False), ForeignKey('billing.granted_access.uuid', ondelete='CASCADE'),
+                        nullable=False)
 
     grant = relationship('GrantedAccess', back_populates='films')
+
+
+class SubscriptionFilmwork(Base):
+    __tablename__ = "subscription_filmwork"
+    __table_args__ = {"schema": "content"}
+
+    id = Column(UUIDType(binary=False), primary_key=True)
+    created_at = Column(DateTime)
+    filmwork_id = Column(UUIDType(binary=False), ForeignKey('content.film_work.id'))
+    subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'))
+
+    def _disallow_modification(self, name, *args, **kwargs):
+        if not name.startswith('_') and not name in ['metadata']:
+            raise NotImplementedError("Cannot modify a read-only instance")
+        else:
+            super().__setattr__(name, *args, **kwargs)
+
+    __setattr__ = _disallow_modification
+    __delattr__ = _disallow_modification
+
+
+class Subscription(DefaultReadOnlyMixin, Base):
+    __tablename__ = "subscribe"
+    __table_args__ = {"schema": "content"}
+
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    periodic_type = Column(String, nullable=False)
+    cost = Column(Integer, nullable=False)
+    charge_type = Column(String)
+    created_by_id = Column(String)
+
+    grants = relationship('GrantedAccess', back_populates='subscription')
+    filmworks = relationship("Filmwork", secondary=SubscriptionFilmwork.__table__, back_populates='subscribes')
+
+    def _disallow_modification(self, name, *args, **kwargs):
+        if not name.startswith('_') and not name in ['metadata']:
+            raise NotImplementedError("Cannot modify a read-only instance")
+        else:
+            super().__setattr__(name, *args, **kwargs)
+
+    __setattr__ = _disallow_modification
+    __delattr__ = _disallow_modification
+
+
+class Filmwork(DefaultReadOnlyMixin, Base):
+    __tablename__ = "film_work"
+    __table_args__ = {"schema": "content"}
+
+    title = Column(String)
+    description = Column(String)
+    creation_date = Column(DateTime)
+    rating = Column(Float)
+    type = Column(String)
+    file_path = Column(String)
+
+    subscribes = relationship("Subscription", secondary=SubscriptionFilmwork.__table__, back_populates='filmworks')
+
+    def _disallow_modification(self, name, *args, **kwargs):
+        if not name.startswith('_') and not name in ['metadata']:
+            raise NotImplementedError("Cannot modify a read-only instance")
+        else:
+            super().__setattr__(name, *args, **kwargs)
+
+    __setattr__ = _disallow_modification
+    __delattr__ = _disallow_modification

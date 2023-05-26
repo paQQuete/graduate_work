@@ -1,7 +1,7 @@
 import datetime
 import uuid
 
-from models.schemas.base import BaseSchemaModel
+from models.schemas.base import BaseSchemaModel, BaseFullModelMixin
 
 from models.models import TypesEnumHolds
 
@@ -17,7 +17,7 @@ class HoldFundsCreate(HoldsFundsBase):
     pass
 
 
-class HoldFunds(HoldsFundsBase):
+class HoldFunds(HoldsFundsBase, BaseFullModelMixin):
     uuid: uuid.UUID
 
     class Config:

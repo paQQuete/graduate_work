@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from models import models
 from models.schemas.transaction import TransactionCreate
+from models.schemas.fund_holds import HoldFundsCreate
 
 
 def create_transaction(db: Session, transaction: TransactionCreate):
@@ -18,6 +19,25 @@ def create_transaction(db: Session, transaction: TransactionCreate):
     db.commit()
     db.refresh(db_trans)
     return db_trans
+
+
+def create_hold(db: Session, hold_funds: HoldFundsCreate):
+    """
+    Create hold transaction
+    :param db:
+    :param hold_funds: pydantic model with data
+    :return:
+    """
+    db_hold = models.FundsOnHold(**hold_funds.dict())
+    db.add(db_hold)
+    db.commit()
+    db.refresh(db_hold)
+    return db_hold
+
+
+def delete_hold(db: Session, hold_uuid: uuid.UUID):
+    db.query(models.FundsOnHold).filter(models.FundsOnHold.uuid == hold_uuid).delete()
+    db.commit()
 
 
 def read_all_by_user(db: Session, user_uuid: uuid.UUID):

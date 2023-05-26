@@ -7,7 +7,8 @@ from models import models, schemas
 
 def read_user_balance(db: Session, user_uuid: uuid.UUID):
     """
-    Return balance of user
+    Return balance of user. It may not be relevant, because taken from already aggregated data.
+    To more accurately determine the balance, you need to aggregate all user transactions)
     :param db: sqlalchemy.orm.Session instance
     :param user_uuid: uuid of user
     :return: ORM object
