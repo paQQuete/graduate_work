@@ -3,6 +3,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from billing.models import Subscription, SubscriptionFilmwork
 
 class TimeStampedMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -58,6 +59,8 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     type = models.TextField(choices=FilmType.choices, blank=False)
     genres = models.ManyToManyField(Genre, through='GenreFilmwork')
     person = models.ManyToManyField(Person, through='PersonFilmwork')
+    subscriptions = models.ManyToManyField(Subscription, related_name='films_relations',
+                                           through=SubscriptionFilmwork)
     file_path = models.FileField(verbose_name=_('File'), blank=True, null=True, upload_to='movies/')
 
     def __str__(self):
@@ -100,4 +103,5 @@ class PersonFilmwork(UUIDMixin):
         db_table = 'content\".\"person_film_work'
         verbose_name = _('Role in film')
         verbose_name_plural = _('Roles in film')
-        constraints = [models.UniqueConstraint(fields=['film_work_id', 'person_id', 'role'], name='film_work_person_idx')]
+        constraints = [
+            models.UniqueConstraint(fields=['film_work_id', 'person_id', 'role'], name='film_work_person_idx')]

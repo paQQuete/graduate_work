@@ -1,0 +1,1 @@
+STRIPE_API_KEY = os.getenv('STRIPE__API_KEY')

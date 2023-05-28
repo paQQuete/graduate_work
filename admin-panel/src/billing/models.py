@@ -4,8 +4,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import User
 
-from movies.models import Filmwork
-
 
 class TimeStampedMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
@@ -44,6 +42,10 @@ class Subscription(UUIDMixin, TimeStampedMixin):
     cost = models.IntegerField(verbose_name=_('Subscribe price'), blank=False, null=False)
     charge_type = models.TextField(choices=ChargeType.choices, blank=False, null=False)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='subscriptions_created')
+    payment_gw_product_id = models.CharField(verbose_name=_('Actual Product ID on payment gateway'), max_length=255,
+                                             null=True, blank=True)
+    films = models.ManyToManyField('movies.Filmwork', through='SubscriptionFilmwork',
+                                   related_name='subscriptions_relations')
 
     def __str__(self):
         return self.name
@@ -58,7 +60,7 @@ class Subscription(UUIDMixin, TimeStampedMixin):
 class SubscriptionFilmwork(UUIDMixin):
     subscription_id = models.ForeignKey(Subscription, on_delete=models.CASCADE, verbose_name=_('Subscription_id'),
                                         db_column='subscription_id')
-    filmwork_id = models.ForeignKey(Filmwork, on_delete=models.DO_NOTHING, verbose_name=_('Filmwork_id'),
+    filmwork_id = models.ForeignKey('movies.Filmwork', on_delete=models.DO_NOTHING, verbose_name=_('Filmwork_id'),
                                     db_column='filmwork_id')
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 

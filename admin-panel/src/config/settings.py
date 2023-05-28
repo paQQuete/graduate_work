@@ -13,7 +13,8 @@ include(
     'components/middleware.py',
     'components/templates.py',
     'components/internationalization.py',
-    'components/logging.py'
+    'components/logging.py',
+    'components/stripe.py',
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent

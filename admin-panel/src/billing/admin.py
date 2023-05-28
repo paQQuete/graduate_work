@@ -11,7 +11,7 @@ class FilmworkSubscriptionInline(admin.TabularInline):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    readonly_fields = ('created_by',)
+    readonly_fields = ('created_by', 'payment_gw_product_id', )
     list_display = ('name', 'periodic_type', 'cost', 'charge_type')
     inlines = (FilmworkSubscriptionInline,)
     search_fields = ('name',)
