@@ -2,7 +2,7 @@ import datetime
 import uuid
 import enum
 
-from sqlalchemy import Column, Integer, DateTime, Enum, String, ForeignKey, Float
+from sqlalchemy import Column, Integer, DateTime, Enum, String, ForeignKey, Float, Boolean, Index
 from sqlalchemy_utils.types.uuid import UUIDType
 from sqlalchemy.orm import relationship
 
@@ -88,6 +88,7 @@ class GrantedAccess(DefaultMixin, Base):
     subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'))
     granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
     available_until = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, nullable=False)
 
     films = relationship('GrantedFilms', back_populates='grant')
     subscription = relationship('Subscription', back_populates='grants')
@@ -95,12 +96,17 @@ class GrantedAccess(DefaultMixin, Base):
 
 class GrantedFilms(DefaultMixin, Base):
     __tablename__ = "granted_films"
-    __table_args__ = {"schema": "billing"}
+    __table_args__ = (
+        Index('ix_billing_granted_films_movie_user_uuids', 'movie_uuid', 'user_uuid'),
+        {"schema": "billing"},
+    )
 
     movie_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
     grant_uuid = Column(UUIDType(binary=False), ForeignKey('billing.granted_access.uuid', ondelete='CASCADE'),
                         nullable=False)
+    user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
+    is_active = Column(Boolean, nullable=False)
 
     grant = relationship('GrantedAccess', back_populates='films')
 

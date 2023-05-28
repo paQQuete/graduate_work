@@ -9,6 +9,7 @@ class GrantedAccessBase(BaseSchemaModel):
     subscription_id: builtin_uuid.UUID
     granted_at: datetime.datetime
     available_until: datetime.datetime
+    is_active: bool
 
 
 class GrantedAccessCreate(GrantedAccessBase):
@@ -18,6 +19,9 @@ class GrantedFilm(BaseFullModelMixin):
     uuid: builtin_uuid.UUID
     granted_at: datetime.datetime
     grant_uuid: builtin_uuid.UUID
+    user_uuid: builtin_uuid.UUID
+    movie_uuid: builtin_uuid.UUID
+    is_active: bool
 
     class Config:
         orm_mode = True

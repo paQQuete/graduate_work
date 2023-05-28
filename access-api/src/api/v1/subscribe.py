@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from services import balance_check, subscribe, transactions_cr
-from models.schemas.subscription import GrantedAccess, GrantedAccessCreate
+from models.schemas.subscription import GrantedAccess, GrantedAccessCreate, GrantedFilm
 from models.schemas.fund_holds import HoldFundsCreate, HoldFunds
 from models.schemas.transaction import TransactionCreate
 
@@ -43,6 +43,9 @@ def buy_from_balance(grant_query: GrantedAccessCreate, db: Session = Depends(get
         raise HTTPException(status_code=406, detail="Refund is not available")
 
 
+@router.get('/check/{movie_uuid}/{user_uuid}')
+def check_movie_available_for_user(user_uuid: uuid.UUID, movie_uuid: uuid.UUID,db: Session = Depends(get_db)):
+    return subscribe.read_movie_access(db=db, user_uuid=user_uuid, movie_uuid=movie_uuid)
 
 
 
