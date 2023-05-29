@@ -23,12 +23,33 @@ class DatabaseDSN(BaseSettings):
         env_file = '.env'
 
 
-class Settings(BaseSettings):
+class RedisDSN(BaseSettings):
+    REDIS_HOST: str
+    REDIS_PORT: int
+
+    class Config:
+        env_file = '.env'
+
+
+class Stripe(BaseSettings):
+    STRIPE__API_KEY: str
+
+
+class Project(BaseSettings):
     PROJECT_NAME: str
+    PROJECT_DOMAIN: str
+    PROJECT_PORT: int
+
+
+class Settings(BaseSettings):
     DB: DatabaseDSN = DatabaseDSN()
+    REDIS: RedisDSN = RedisDSN()
+    STRIPE: Stripe = Stripe()
+    PROJECT: Project = Project()
 
     SQLALCHEMY_DATABASE_URL = \
         f"postgresql://{DB.DB_USER}:{DB.DB_PASSWORD}@{DB.POSTGRES_HOST}:{DB.POSTGRES_PORT}/{DB.BILLING_DB}"
+    PROJECT_URL = f"http://{PROJECT.PROJECT_DOMAIN}:{PROJECT.PROJECT_PORT}"
 
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,8 +58,3 @@ class Settings(BaseSettings):
 
 
 SETTINGS = Settings()
-
-# with open('../alembic.ini', mode='w') as f:
-#     conf = f.read()
-#     conf = conf.replace('{{sqlalchemy.url}}', f'sqlalchemy.url = {SETTINGS.SQLALCHEMY_DATABASE_URL}')
-#     f.write(conf)

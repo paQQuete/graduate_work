@@ -69,6 +69,7 @@ class FundsOnHold(DefaultMixin, TransactionBase, Base):
     type = Column(Enum(TypesEnumHolds), index=True, nullable=False)
 
 
+# ну это можно убрать, если кешировать айди чекаут сесси в редис - и это будет норм вариант
 class TrasnactionOrder(DefaultMixin, Base):
     __tablename__ = "trans_order"
     __table_args__ = {"schema": "billing"}
@@ -140,6 +141,8 @@ class Subscription(DefaultReadOnlyMixin, Base):
     cost = Column(Integer, nullable=False)
     charge_type = Column(String)
     created_by_id = Column(String)
+    payment_gw_product_id = Column(String)
+    payment_gw_price_id = Column(String)
 
     grants = relationship('GrantedAccess', back_populates='subscription')
     filmworks = relationship("Filmwork", secondary=SubscriptionFilmwork.__table__, back_populates='subscribes')
