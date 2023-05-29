@@ -37,13 +37,15 @@ class Subscription(UUIDMixin, TimeStampedMixin):
         one_time = 'one-time', _('One-Time')
 
     name = models.CharField(verbose_name=_('Name'), max_length=255, null=False, blank=False)
-    description = models.TextField(verbose_name=_('Description'), null=True, blank=True)
+    description = models.TextField(verbose_name=_('Description'), null=False, blank=False)
     periodic_type = models.TextField(choices=SubscriptionType.choices, blank=False, null=False)
     cost = models.IntegerField(verbose_name=_('Subscribe price'), blank=False, null=False)
     charge_type = models.TextField(choices=ChargeType.choices, blank=False, null=False)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='subscriptions_created')
     payment_gw_product_id = models.CharField(verbose_name=_('Actual Product ID on payment gateway'), max_length=255,
-                                             null=True, blank=True)
+                                             null=False, blank=True)
+    payment_gw_price_id = models.CharField(verbose_name=_('Latest Price ID for this subscription plan on payment gateway'),
+                                           max_length=255, null=False, blank=True)
     films = models.ManyToManyField('movies.Filmwork', through='SubscriptionFilmwork',
                                    related_name='subscriptions_relations')
 
