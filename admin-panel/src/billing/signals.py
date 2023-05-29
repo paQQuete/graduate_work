@@ -21,5 +21,6 @@ def create_product_price_stripe(sender, instance, **kwargs):
     )
     post_save.disconnect(create_product_price_stripe, sender=sender)
     instance.payment_gw_product_id = subscription.id
+    instance.payment_gw_price_id = subscription.default_price
     instance.save()
     post_save.connect(create_product_price_stripe, sender=sender)
