@@ -12,6 +12,7 @@ class GrantedAccessBase(BaseSchemaModel):
     is_active: bool
 
 
+
 class GrantedAccessCreate(GrantedAccessBase):
     pass
 

@@ -10,6 +10,16 @@ def fetch_price(db: Session, subscribe_id: uuid.UUID) -> tuple[int, str]:
     output = db.query(Subscription).filter(Subscription.id == subscribe_id).one()
     return output.cost, output.charge_type
 
+def get_price_id(db: Session, subscribe_id: uuid.UUID) -> str:
+    """
+    Function return Price ID of Product ID (this is subscription plan on Stripe side) from database.
+    There is only one for each subscription.
+    :param db:
+    :param subscribe_id:
+    :return: Price ID string
+    """
+    return db.query(Subscription).filter(Subscription.id == subscribe_id).one().payment_gw_price_id
+
 
 def grant_access(db: Session, grant_access: GrantedAccessCreate):
     """

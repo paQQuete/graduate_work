@@ -4,16 +4,18 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 import sentry_sdk
+import aioredis
 
-from api.v1 import transactions, balance, refund, subscribe
-from core import config
+from api.v1 import transactions, balance, refund, subscribe, payment
+from core.config import SETTINGS
 from core.logger import LOGGING
+from db import redis
 
 sentry_sdk.init(
     dsn="https://d7b229275c864cb9aa5d7a3b7f2ac257@o4504634582302720.ingest.sentry.io/4504662476390400")
 
 app = FastAPI(
-    title=config.Settings().PROJECT_NAME,
+    title=SETTINGS.PROJECT.PROJECT_NAME,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
@@ -22,24 +24,24 @@ app = FastAPI(
 
 @app.on_event('startup')
 async def startup():
-    pass
+    redis.redis = await aioredis.create_redis_pool(
+        (SETTINGS.REDIS.REDIS_HOST, SETTINGS.REDIS.REDIS_PORT), minsize=10, maxsize=20
+    )
 
 
 @app.on_event('shutdown')
 async def shutdown():
-    pass
+    redis.redis.close()
+    await redis.redis.wait_closed()
 
 
 app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['transactions'])
 app.include_router(balance.router, prefix='/api/v1/balance', tags=['balance'])
 app.include_router(refund.router, prefix='/api/v1/refund', tags=['refund'])
 app.include_router(subscribe.router, prefix='/api/v1/subscribe', tags=['subscribe'])
+app.include_router(payment.router, prefix='/api/v1/payment', tags=['payment'])
 
 if __name__ == '__main__':
-    # Приложение может запускаться командой
-    # `uvicorn main:app --host 0.0.0.0 --port 8000`
-    # но чтобы не терять возможность использовать дебагер,
-    # запустим uvicorn сервер через python
     uvicorn.run(
         'main:app',
         host='0.0.0.0',
