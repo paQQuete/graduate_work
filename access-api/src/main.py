@@ -6,7 +6,7 @@ from fastapi.responses import ORJSONResponse
 import sentry_sdk
 import aioredis
 
-from api.v1 import transactions, balance, refund, subscribe, payment
+from api.v1 import transactions, balance, refund, subscribe, payment, webhook
 from core.config import SETTINGS
 from core.logger import LOGGING
 from db import redis
@@ -40,6 +40,7 @@ app.include_router(balance.router, prefix='/api/v1/balance', tags=['balance'])
 app.include_router(refund.router, prefix='/api/v1/refund', tags=['refund'])
 app.include_router(subscribe.router, prefix='/api/v1/subscribe', tags=['subscribe'])
 app.include_router(payment.router, prefix='/api/v1/payment', tags=['payment'])
+app.include_router(webhook.router, prefix='/api/v1/webhook', tags=['webhooks'])
 
 if __name__ == '__main__':
     uvicorn.run(

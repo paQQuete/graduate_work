@@ -1,14 +1,16 @@
+import datetime
 import uuid
 
 from sqlalchemy.orm import Session
 
 from models.models import Subscription, GrantedFilms, GrantedAccess
-from models.schemas.subscription import GrantedAccessCreate
+from models.schemas.subscription import SimpleGrantAccessCreate
 
 
 def fetch_price(db: Session, subscribe_id: uuid.UUID) -> tuple[int, str]:
     output = db.query(Subscription).filter(Subscription.id == subscribe_id).one()
-    return output.cost, output.charge_type
+    return output.all_time_cost
+
 
 def get_price_id(db: Session, subscribe_id: uuid.UUID) -> str:
     """
@@ -21,7 +23,7 @@ def get_price_id(db: Session, subscribe_id: uuid.UUID) -> str:
     return db.query(Subscription).filter(Subscription.id == subscribe_id).one().payment_gw_price_id
 
 
-def grant_access(db: Session, grant_access: GrantedAccessCreate):
+def grant_access(db: Session, grant_access: SimpleGrantAccessCreate):
     """
     Grant access to subscription plan
     :param db:
@@ -29,12 +31,20 @@ def grant_access(db: Session, grant_access: GrantedAccessCreate):
     :return: ORM object
     """
     subscription = db.query(Subscription).filter(Subscription.id == grant_access.subscription_id).one()
-    db_grant = GrantedAccess(uuid=uuid.uuid4(), **grant_access.dict())
+    db_grant = GrantedAccess(
+        uuid=uuid.uuid4(),
+        user_uuid=grant_access.user_uuid,
+        subscription_id=grant_access.subscription_id,
+        granted_at=datetime.datetime.now(),
+        available_until=datetime.datetime.now() + datetime.timedelta(
+            days=db.query(Subscription).filter(Subscription.id == grant_access.subscription_id).one().duration),
+        is_active=True
+    )
     db.add(db_grant)
     for film in subscription.filmworks:
-        film = film.as_dict
+
         grant_film = GrantedFilms(
-            movie_uuid=film['id'], user_uuid=db_grant.user_uuid, granted_at=db_grant.granted_at,
+            movie_uuid=film.id, user_uuid=db_grant.user_uuid, granted_at=db_grant.granted_at,
             grant_uuid=db_grant.uuid, uuid=uuid.uuid4(), is_active=True
         )
         db_grant.films.append(grant_film)

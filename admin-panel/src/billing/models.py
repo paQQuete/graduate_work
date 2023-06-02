@@ -28,19 +28,11 @@ class UUIDMixinBilling(models.Model):
 
 
 class Subscription(UUIDMixin, TimeStampedMixin):
-    class SubscriptionType(models.TextChoices):
-        one = 'one', _('One')
-        batch = 'batch', _('Batch')
-
-    class ChargeType(models.TextChoices):
-        daily = 'daily', _('Daily')
-        one_time = 'one-time', _('One-Time')
-
     name = models.CharField(verbose_name=_('Name'), max_length=255, null=False, blank=False)
     description = models.TextField(verbose_name=_('Description'), null=False, blank=False)
-    periodic_type = models.TextField(choices=SubscriptionType.choices, blank=False, null=False)
-    cost = models.IntegerField(verbose_name=_('Subscribe price'), blank=False, null=False)
-    charge_type = models.TextField(choices=ChargeType.choices, blank=False, null=False)
+    cost = models.IntegerField(verbose_name=_('Subscribe price per day'), blank=False, null=False)
+    duration = models.IntegerField(verbose_name=_('Duration of subscription'), blank=False, null=False)
+    all_time_cost = models.IntegerField(verbose_name=_('All time cost '), blank=True, null=False, default=0)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='subscriptions_created')
     payment_gw_product_id = models.CharField(verbose_name=_('Actual Product ID on payment gateway'), max_length=255,
                                              null=False, blank=True)
@@ -56,7 +48,6 @@ class Subscription(UUIDMixin, TimeStampedMixin):
         db_table = 'content\".\"subscribe'
         verbose_name = _('Subscribe plan')
         verbose_name_plural = _('Subscribe plans')
-        indexes = [models.Index(fields=['periodic_type'], name='subscription_periodic_type_idx')]
 
 
 class SubscriptionFilmwork(UUIDMixin):

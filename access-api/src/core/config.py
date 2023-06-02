@@ -33,6 +33,8 @@ class RedisDSN(BaseSettings):
 
 class Stripe(BaseSettings):
     STRIPE__API_KEY: str
+    STRIPE__WEBHOOK_SECRET: str
+    STRIPE__BALANCE_PROD_ID: str
 
 
 class Project(BaseSettings):

@@ -1,8 +1,8 @@
-"""initial migration
+"""initial_migration
 
-Revision ID: f33f9448722f
+Revision ID: e907b59c1821
 Revises: 
-Create Date: 2023-05-27 21:20:43.947268
+Create Date: 2023-06-01 23:34:26.104309
 
 """
 import sqlalchemy_utils
@@ -11,9 +11,9 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'f33f9448722f'
+revision = 'e907b59c1821'
 down_revision = None
-branch_labels = ('main',)
+branch_labels = None
 depends_on = None
 
 
@@ -109,20 +109,20 @@ def upgrade() -> None:
                     sa.PrimaryKeyConstraint('uuid'),
                     schema='billing'
                     )
+    op.create_index('ix_billing_granted_films_movie_user_uuids', 'granted_films', ['movie_uuid', 'user_uuid'],
+                    unique=False, schema='billing')
     op.create_index(op.f('ix_billing_granted_films_movie_uuid'), 'granted_films', ['movie_uuid'], unique=False,
                     schema='billing')
     op.create_index(op.f('ix_billing_granted_films_user_uuid'), 'granted_films', ['user_uuid'], unique=False,
                     schema='billing')
     op.create_index(op.f('ix_billing_granted_films_uuid'), 'granted_films', ['uuid'], unique=False, schema='billing')
-    op.create_index('ix_billing_granted_films_movie_user_uuids', 'granted_films', ['movie_uuid', 'user_uuid'], unique=False,
-                    schema='billing')
 
 
 def downgrade() -> None:
-    op.drop_index('ix_granted_films_movie_user_uuids', table_name='granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_uuid'), table_name='granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_user_uuid'), table_name='granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_movie_uuid'), table_name='granted_films', schema='billing')
+    op.drop_index('ix_billing_granted_films_movie_user_uuids', table_name='granted_films', schema='billing')
     op.drop_table('granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_access_uuid'), table_name='granted_access', schema='billing')
     op.drop_index(op.f('ix_billing_granted_access_user_uuid'), table_name='granted_access', schema='billing')
@@ -143,4 +143,3 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_billing_balance_uuid'), table_name='balance', schema='billing')
     op.drop_index(op.f('ix_billing_balance_user_uuid'), table_name='balance', schema='billing')
     op.drop_table('balance', schema='billing')
-

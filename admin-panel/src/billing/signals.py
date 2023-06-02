@@ -10,17 +10,19 @@ stripe.api_key = settings.STRIPE_API_KEY
 
 @receiver(post_save, sender=Subscription)
 def create_product_price_stripe(sender, instance, **kwargs):
+    full_price = instance.cost * instance.duration
     subscription = stripe.Product.create(
         name=instance.name,
         description=instance.description,
         default_price_data={
             "currency": "USD",
-            "unit_amount": instance.cost * 100,
+            "unit_amount": full_price * 100,
         },
 
     )
     post_save.disconnect(create_product_price_stripe, sender=sender)
     instance.payment_gw_product_id = subscription.id
     instance.payment_gw_price_id = subscription.default_price
+    instance.all_time_cost = full_price
     instance.save()
     post_save.connect(create_product_price_stripe, sender=sender)

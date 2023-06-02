@@ -6,16 +6,16 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from services import balance_check, subscribe, transactions_cr
-from models.schemas.subscription import GrantedAccess, GrantedAccessCreate, GrantedFilm
-from models.schemas.fund_holds import HoldFundsCreate, HoldFunds
+from models.schemas.subscription import GrantedAccess, SimpleGrantAccessCreate
+from models.schemas.fund_holds import HoldFundsCreate
 from models.schemas.transaction import TransactionCreate
 
 router = APIRouter()
 
 
 @router.post('/buy/from_balance', response_model=GrantedAccess)
-def buy_from_balance(grant_query: GrantedAccessCreate, db: Session = Depends(get_db)):
-    price, charge_type = subscribe.fetch_price(db=db, subscribe_id=grant_query.subscription_id)
+def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = Depends(get_db)):
+    price = subscribe.fetch_price(db=db, subscribe_id=grant_query.subscription_id)
 
     if balance_check.aggregate(db=db, user_uuid=grant_query.user_uuid) >= price:
         hold_funds = transactions_cr.create_hold(
@@ -40,7 +40,7 @@ def buy_from_balance(grant_query: GrantedAccessCreate, db: Session = Depends(get
             transactions_cr.delete_hold(db=db, hold_uuid=hold_funds.uuid)
             return grant
     else:
-        raise HTTPException(status_code=406, detail="Refund is not available")
+        raise HTTPException(status_code=406, detail="Not enough balance")
 
 
 @router.get('/check/{movie_uuid}/{user_uuid}')

@@ -137,9 +137,9 @@ class Subscription(DefaultReadOnlyMixin, Base):
 
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    periodic_type = Column(String, nullable=False)
     cost = Column(Integer, nullable=False)
-    charge_type = Column(String)
+    duration = Column(Integer, nullable=False)
+    all_time_cost = Column(Integer, nullable=False)
     created_by_id = Column(String)
     payment_gw_product_id = Column(String)
     payment_gw_price_id = Column(String)

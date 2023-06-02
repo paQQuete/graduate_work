@@ -12,9 +12,14 @@ class GrantedAccessBase(BaseSchemaModel):
     is_active: bool
 
 
-
 class GrantedAccessCreate(GrantedAccessBase):
     pass
+
+
+class SimpleGrantAccessCreate(BaseSchemaModel):
+    user_uuid: builtin_uuid.UUID
+    subscription_id: builtin_uuid.UUID
+
 
 class GrantedFilm(BaseFullModelMixin):
     uuid: builtin_uuid.UUID
@@ -26,7 +31,6 @@ class GrantedFilm(BaseFullModelMixin):
 
     class Config:
         orm_mode = True
-
 
 
 class GrantedAccess(GrantedAccessBase, BaseFullModelMixin):
