@@ -1,0 +1,966 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "access-api",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/transactions/": {
+      "post": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Create Trans",
+        "operationId": "create_trans_api_v1_transactions__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Transaction"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/{user_uuid}/pagination": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Read Trans By User Pagination",
+        "operationId": "read_trans_by_user_pagination_api_v1_transactions__user_uuid__pagination_get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_uuid",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Skip",
+              "type": "integer",
+              "default": 0
+            },
+            "name": "skip",
+            "in": "query"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Limit",
+              "type": "integer",
+              "default": 100
+            },
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Read Trans By User Pagination Api V1 Transactions  User Uuid  Pagination Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transactions/{user_uuid}": {
+      "get": {
+        "tags": [
+          "transactions"
+        ],
+        "summary": "Read Trans By User All",
+        "operationId": "read_trans_by_user_all_api_v1_transactions__user_uuid__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_uuid",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Read Trans By User All Api V1 Transactions  User Uuid  Get",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Transaction"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/balance/{user_uuid}": {
+      "get": {
+        "tags": [
+          "balance"
+        ],
+        "summary": "Read User Balance",
+        "operationId": "read_user_balance_api_v1_balance__user_uuid__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_uuid",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Balance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund/request": {
+      "post": {
+        "tags": [
+          "refund"
+        ],
+        "summary": "Refund Availability",
+        "operationId": "refund_availability_api_v1_refund_request_post",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_uuid",
+            "in": "query"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Amount",
+              "type": "integer"
+            },
+            "name": "amount",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund/grant/{grant_id}/": {
+      "get": {
+        "tags": [
+          "refund"
+        ],
+        "summary": "Refund Subscribe",
+        "description": "Partial refund for a subscription, in accordance with the days spent\n:param grant_id:\n:param db:\n:return:",
+        "operationId": "refund_subscribe_api_v1_refund_grant__grant_id___get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Grant Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "grant_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/refund/transaction/{transaction_id}": {
+      "get": {
+        "tags": [
+          "refund"
+        ],
+        "summary": "Refund Transaction",
+        "description": "Refund of a specific transaction, checking if the current balance is enough to refund\n:param transaction_id:\n:param db:\n:return:",
+        "operationId": "refund_transaction_api_v1_refund_transaction__transaction_id__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Transaction Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "transaction_id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscribe/buy/from_balance": {
+      "post": {
+        "tags": [
+          "subscribe"
+        ],
+        "summary": "Buy From Balance",
+        "operationId": "buy_from_balance_api_v1_subscribe_buy_from_balance_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimpleGrantAccessCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GrantedAccess"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/subscribe/check/{movie_uuid}/{user_uuid}": {
+      "get": {
+        "tags": [
+          "subscribe"
+        ],
+        "summary": "Check Movie Available For User",
+        "operationId": "check_movie_available_for_user_api_v1_subscribe_check__movie_uuid___user_uuid__get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_uuid",
+            "in": "path"
+          },
+          {
+            "required": true,
+            "schema": {
+              "title": "Movie Uuid",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "movie_uuid",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/card/{subscribe_id}/": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Buy From Card",
+        "operationId": "buy_from_card_api_v1_payment_card__subscribe_id___get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "Subscribe Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "subscribe_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "User Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/topup/{user_id}/": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Topup Balance",
+        "operationId": "topup_balance_api_v1_payment_topup__user_id___get",
+        "parameters": [
+          {
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": "user_id",
+            "in": "path"
+          },
+          {
+            "required": false,
+            "schema": {
+              "title": "Amount",
+              "type": "integer"
+            },
+            "name": "amount",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/success/": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Success",
+        "operationId": "success_api_v1_payment_success__get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Cache",
+              "type": "string"
+            },
+            "name": "cache",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/payment/cancel/": {
+      "get": {
+        "tags": [
+          "payment"
+        ],
+        "summary": "Cancel",
+        "operationId": "cancel_api_v1_payment_cancel__get",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Cache",
+              "type": "string"
+            },
+            "name": "cache",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhook/": {
+      "post": {
+        "tags": [
+          "webhooks"
+        ],
+        "summary": "Webhook Success Payment",
+        "operationId": "webhook_success_payment_api_v1_webhook__post",
+        "parameters": [
+          {
+            "required": false,
+            "schema": {
+              "title": "Stripe-Signature",
+              "type": "string"
+            },
+            "name": "stripe-signature",
+            "in": "header"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Balance": {
+        "title": "Balance",
+        "required": [
+          "created_at",
+          "user_uuid",
+          "balance",
+          "timestamp_offset",
+          "uuid"
+        ],
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "balance": {
+            "title": "Balance",
+            "type": "integer"
+          },
+          "timestamp_offset": {
+            "title": "Timestamp Offset",
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "GrantedAccess": {
+        "title": "GrantedAccess",
+        "required": [
+          "created_at",
+          "user_uuid",
+          "subscription_id",
+          "granted_at",
+          "available_until",
+          "is_active",
+          "uuid",
+          "films"
+        ],
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "subscription_id": {
+            "title": "Subscription Id",
+            "type": "string",
+            "format": "uuid"
+          },
+          "granted_at": {
+            "title": "Granted At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "available_until": {
+            "title": "Available Until",
+            "type": "string",
+            "format": "date-time"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "films": {
+            "title": "Films",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GrantedFilm"
+            }
+          }
+        }
+      },
+      "GrantedFilm": {
+        "title": "GrantedFilm",
+        "required": [
+          "created_at",
+          "uuid",
+          "granted_at",
+          "grant_uuid",
+          "user_uuid",
+          "movie_uuid",
+          "is_active"
+        ],
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "granted_at": {
+            "title": "Granted At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "grant_uuid": {
+            "title": "Grant Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "movie_uuid": {
+            "title": "Movie Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          }
+        }
+      },
+      "HTTPValidationError": {
+        "title": "HTTPValidationError",
+        "type": "object",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            }
+          }
+        }
+      },
+      "SimpleGrantAccessCreate": {
+        "title": "SimpleGrantAccessCreate",
+        "required": [
+          "user_uuid",
+          "subscription_id"
+        ],
+        "type": "object",
+        "properties": {
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "subscription_id": {
+            "title": "Subscription Id",
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "Transaction": {
+        "title": "Transaction",
+        "required": [
+          "created_at",
+          "user_uuid",
+          "type",
+          "cost",
+          "timestamp",
+          "uuid"
+        ],
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypesEnum"
+          },
+          "cost": {
+            "title": "Cost",
+            "type": "integer"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "string",
+            "format": "date-time"
+          },
+          "uuid": {
+            "title": "Uuid",
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TransactionCreate": {
+        "title": "TransactionCreate",
+        "required": [
+          "user_uuid",
+          "type",
+          "cost",
+          "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "user_uuid": {
+            "title": "User Uuid",
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypesEnum"
+          },
+          "cost": {
+            "title": "Cost",
+            "type": "integer"
+          },
+          "timestamp": {
+            "title": "Timestamp",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TypesEnum": {
+        "title": "TypesEnum",
+        "enum": [
+          "topup",
+          "spending",
+          "refund"
+        ],
+        "description": "An enumeration."
+      },
+      "ValidationError": {
+        "title": "ValidationError",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "loc": {
+            "title": "Location",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            }
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
