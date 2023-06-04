@@ -60,6 +60,10 @@ async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
             'available_until': datetime.datetime.now(),
             'is_active': False
         })
+
+        for film in db.query(GrantedAccess).filter(GrantedAccess.uuid == grant_id).one().films:
+            film.is_active = False
+
         ref_newtrans = await transactions_cr.create_transaction(db=db, transaction=TransactionCreate(
             user_uuid=grant.user_uuid,
             type='refund',

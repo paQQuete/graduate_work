@@ -32,7 +32,7 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
             checkout_type, value1, value2 = event['data']['object']['client_reference_id'].split('_')
             if checkout_type == 'buy':
                 subscribe_id, user_uuid = value1, value2
-                cost = event['data']['object']['amount_total']
+                cost = event['data']['object']['amount_total'] / 100
                 grant = await subscribe.grant_access(db=db, grant_create=SimpleGrantAccessCreate(
                     user_uuid=user_uuid,
                     subscription_id=subscribe_id
@@ -50,11 +50,13 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
                         topup_trans = deepcopy(transaction)
             elif checkout_type == 'topup':
                 user_uuid, amount = value1, value2
-                topup_trans = await transactions_cr.create_transaction(db=db, transaction=TransactionCreate(
+                topup_trans = await transactions_cr.create_transaction(db=db, transaction=Transaction(
+                    uuid=uuid.uuid4(),
                     user_uuid=user_uuid,
                     type='topup',
                     cost=amount,
-                    timestamp=datetime.datetime.now()
+                    timestamp=datetime.datetime.now(),
+                    created_at=datetime.datetime.now()
                 ))
                 grant = None
 
