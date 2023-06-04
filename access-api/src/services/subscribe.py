@@ -2,6 +2,7 @@ import datetime
 import uuid
 
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from models.models import Subscription, GrantedFilms, GrantedAccess
 from models.schemas.subscription import SimpleGrantAccessCreate
@@ -65,7 +66,7 @@ async def read_movie_access(db: Session, user_uuid: uuid.UUID, movie_uuid: uuid.
         GrantedFilms.movie_uuid == movie_uuid, GrantedFilms.user_uuid == user_uuid, GrantedFilms.is_active == True
     ).all()
     if not query:
-        return False
+        raise HTTPException(status_code=403, detail='Movie is not available for this user')
     else:
         return True
 
