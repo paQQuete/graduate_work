@@ -3,11 +3,11 @@ import uuid
 from sqlalchemy.orm import Session
 
 from models import models
-from models.schemas.transaction import TransactionCreate
+from models.schemas.transaction import Transaction, TransactionCreate
 from models.schemas.fund_holds import HoldFundsCreate
 
 
-def create_transaction(db: Session, transaction: TransactionCreate):
+async def create_transaction(db: Session, transaction: TransactionCreate | Transaction):
     '''
     Create one transaction
     :param db: sqlalchemy.orm.Session instance
@@ -16,12 +16,11 @@ def create_transaction(db: Session, transaction: TransactionCreate):
     '''
     db_trans = models.Transaction(**transaction.dict())
     db.add(db_trans)
-    db.commit()
-    db.refresh(db_trans)
+    db.flush()
     return db_trans
 
 
-def create_hold(db: Session, hold_funds: HoldFundsCreate):
+async def create_hold(db: Session, hold_funds: HoldFundsCreate):
     """
     Create hold transaction
     :param db:
@@ -30,17 +29,16 @@ def create_hold(db: Session, hold_funds: HoldFundsCreate):
     """
     db_hold = models.FundsOnHold(**hold_funds.dict())
     db.add(db_hold)
-    db.commit()
-    db.refresh(db_hold)
+    db.flush()
     return db_hold
 
 
-def delete_hold(db: Session, hold_uuid: uuid.UUID):
+async def delete_hold(db: Session, hold_uuid: uuid.UUID):
     db.query(models.FundsOnHold).filter(models.FundsOnHold.uuid == hold_uuid).delete()
-    db.commit()
+    db.flush()
 
 
-def read_all_by_user(db: Session, user_uuid: uuid.UUID):
+async def read_all_by_user(db: Session, user_uuid: uuid.UUID):
     '''
     Fetch all transactions by user_uuid
     :param db: db: sqlalchemy.orm.Session instance
@@ -50,7 +48,7 @@ def read_all_by_user(db: Session, user_uuid: uuid.UUID):
     return db.query(models.Transaction).filter(models.Transaction.user_uuid == str(user_uuid)).all()
 
 
-def read_by_user(db: Session, user_uuid: uuid.UUID, skip: int, limit: int = 50):
+async def read_by_user(db: Session, user_uuid: uuid.UUID, skip: int, limit: int = 50):
     '''
     Fetch transactions by user_uuid with offset and limit
     :param db: sqlalchemy.orm.Session instance

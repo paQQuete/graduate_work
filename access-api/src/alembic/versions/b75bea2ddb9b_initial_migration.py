@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: e907b59c1821
+Revision ID: b75bea2ddb9b
 Revises: 
-Create Date: 2023-06-01 23:34:26.104309
+Create Date: 2023-06-04 01:40:57.233613
 
 """
 import sqlalchemy_utils
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'e907b59c1821'
+revision = 'b75bea2ddb9b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,25 +46,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_billing_funds_hold_user_uuid'), 'funds_hold', ['user_uuid'], unique=False,
                     schema='billing')
     op.create_index(op.f('ix_billing_funds_hold_uuid'), 'funds_hold', ['uuid'], unique=False, schema='billing')
-    op.create_table('trans_order',
-                    sa.Column('user_uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
-                    sa.Column('payment_session_id', sa.String(), nullable=False),
-                    sa.Column('subscribe_id', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
-                    sa.Column('started_at', sa.DateTime(), nullable=False),
-                    sa.Column('ended_at', sa.DateTime(), nullable=True),
-                    sa.Column('uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
-                    sa.Column('created_at', sa.DateTime(), nullable=False),
-                    sa.Column('updated_at', sa.DateTime(), nullable=True),
-                    sa.PrimaryKeyConstraint('uuid'),
-                    schema='billing'
-                    )
-    op.create_index(op.f('ix_billing_trans_order_payment_session_id'), 'trans_order', ['payment_session_id'],
-                    unique=False, schema='billing')
-    op.create_index(op.f('ix_billing_trans_order_subscribe_id'), 'trans_order', ['subscribe_id'], unique=False,
-                    schema='billing')
-    op.create_index(op.f('ix_billing_trans_order_user_uuid'), 'trans_order', ['user_uuid'], unique=False,
-                    schema='billing')
-    op.create_index(op.f('ix_billing_trans_order_uuid'), 'trans_order', ['uuid'], unique=False, schema='billing')
     op.create_table('transaction',
                     sa.Column('type', sa.Enum('topup', 'spending', 'refund', name='typesenum'), nullable=False),
                     sa.Column('uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
@@ -82,10 +63,11 @@ def upgrade() -> None:
     op.create_index(op.f('ix_billing_transaction_uuid'), 'transaction', ['uuid'], unique=False, schema='billing')
     op.create_table('granted_access',
                     sa.Column('user_uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
-                    sa.Column('subscription_id', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=True),
+                    sa.Column('subscription_id', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
                     sa.Column('granted_at', sa.DateTime(), nullable=False),
                     sa.Column('available_until', sa.DateTime(), nullable=False),
                     sa.Column('is_active', sa.Boolean(), nullable=False),
+                    sa.Column('cost_per_day', sa.Integer(), nullable=False),
                     sa.Column('uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
                     sa.Column('created_at', sa.DateTime(), nullable=False),
                     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -116,9 +98,40 @@ def upgrade() -> None:
     op.create_index(op.f('ix_billing_granted_films_user_uuid'), 'granted_films', ['user_uuid'], unique=False,
                     schema='billing')
     op.create_index(op.f('ix_billing_granted_films_uuid'), 'granted_films', ['uuid'], unique=False, schema='billing')
+    op.create_table('trans_order',
+                    sa.Column('user_uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
+                    sa.Column('checkout_session_id', sa.String(), nullable=False),
+                    sa.Column('payment_intent_id', sa.String(), nullable=False),
+                    sa.Column('granted_access_id', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=True),
+                    sa.Column('topup_transaction', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=True),
+                    sa.Column('refund_transaction', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=True),
+                    sa.Column('uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
+                    sa.Column('created_at', sa.DateTime(), nullable=False),
+                    sa.Column('updated_at', sa.DateTime(), nullable=True),
+                    sa.ForeignKeyConstraint(['granted_access_id'], ['billing.granted_access.uuid'], ),
+                    sa.ForeignKeyConstraint(['refund_transaction'], ['billing.transaction.uuid'], ),
+                    sa.ForeignKeyConstraint(['topup_transaction'], ['billing.transaction.uuid'], ),
+                    sa.PrimaryKeyConstraint('uuid'),
+                    sa.UniqueConstraint('granted_access_id'),
+                    sa.UniqueConstraint('refund_transaction'),
+                    sa.UniqueConstraint('topup_transaction'),
+                    schema='billing'
+                    )
+    op.create_index(op.f('ix_billing_trans_order_checkout_session_id'), 'trans_order', ['checkout_session_id'],
+                    unique=True, schema='billing')
+    op.create_index(op.f('ix_billing_trans_order_payment_intent_id'), 'trans_order', ['payment_intent_id'], unique=True,
+                    schema='billing')
+    op.create_index(op.f('ix_billing_trans_order_user_uuid'), 'trans_order', ['user_uuid'], unique=False,
+                    schema='billing')
+    op.create_index(op.f('ix_billing_trans_order_uuid'), 'trans_order', ['uuid'], unique=False, schema='billing')
 
 
 def downgrade() -> None:
+    op.drop_index(op.f('ix_billing_trans_order_uuid'), table_name='trans_order', schema='billing')
+    op.drop_index(op.f('ix_billing_trans_order_user_uuid'), table_name='trans_order', schema='billing')
+    op.drop_index(op.f('ix_billing_trans_order_payment_intent_id'), table_name='trans_order', schema='billing')
+    op.drop_index(op.f('ix_billing_trans_order_checkout_session_id'), table_name='trans_order', schema='billing')
+    op.drop_table('trans_order', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_uuid'), table_name='granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_user_uuid'), table_name='granted_films', schema='billing')
     op.drop_index(op.f('ix_billing_granted_films_movie_uuid'), table_name='granted_films', schema='billing')
@@ -131,11 +144,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_billing_transaction_user_uuid'), table_name='transaction', schema='billing')
     op.drop_index(op.f('ix_billing_transaction_type'), table_name='transaction', schema='billing')
     op.drop_table('transaction', schema='billing')
-    op.drop_index(op.f('ix_billing_trans_order_uuid'), table_name='trans_order', schema='billing')
-    op.drop_index(op.f('ix_billing_trans_order_user_uuid'), table_name='trans_order', schema='billing')
-    op.drop_index(op.f('ix_billing_trans_order_subscribe_id'), table_name='trans_order', schema='billing')
-    op.drop_index(op.f('ix_billing_trans_order_payment_session_id'), table_name='trans_order', schema='billing')
-    op.drop_table('trans_order', schema='billing')
     op.drop_index(op.f('ix_billing_funds_hold_uuid'), table_name='funds_hold', schema='billing')
     op.drop_index(op.f('ix_billing_funds_hold_user_uuid'), table_name='funds_hold', schema='billing')
     op.drop_index(op.f('ix_billing_funds_hold_type'), table_name='funds_hold', schema='billing')

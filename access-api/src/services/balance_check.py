@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from models.models import Transaction, FundsOnHold
 
 
-def aggregate(db: Session, user_uuid: uuid.UUID) -> int:
+async def aggregate(db: Session, user_uuid: uuid.UUID) -> int:
     """
     Aggregate all transactions and holds-transactions for user
     :param db: Session object

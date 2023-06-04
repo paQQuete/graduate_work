@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     operations = [
     migrations.RunSQL('''CREATE SCHEMA IF NOT EXISTS content;
 ALTER ROLE app SET search_path TO content,public;
-CREATE EXTENSION "uuid-ossp";'''),
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'''),
 
 
     migrations.CreateModel(

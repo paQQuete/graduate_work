@@ -52,6 +52,11 @@ class Transaction(DefaultMixin, TransactionBase, Base):
 
     type = Column(Enum(TypesEnum), index=True, nullable=False)
 
+    topup_order = relationship('TransactionOrder', back_populates='topup',
+                               foreign_keys='TransactionOrder.topup_transaction')
+    refund_order = relationship('TransactionOrder', back_populates='refund',
+                                foreign_keys='TransactionOrder.refund_transaction')
+
 
 class Balance(DefaultMixin, Base):
     __tablename__ = "balance"
@@ -69,16 +74,24 @@ class FundsOnHold(DefaultMixin, TransactionBase, Base):
     type = Column(Enum(TypesEnumHolds), index=True, nullable=False)
 
 
-# ну это можно убрать, если кешировать айди чекаут сесси в редис - и это будет норм вариант
-class TrasnactionOrder(DefaultMixin, Base):
+class TransactionOrder(DefaultMixin, Base):
     __tablename__ = "trans_order"
     __table_args__ = {"schema": "billing"}
 
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
-    payment_session_id = Column(String, index=True, nullable=False)
-    subscribe_id = Column(UUIDType(binary=False), index=True, nullable=False)
-    started_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
-    ended_at = Column(DateTime, nullable=True)
+    checkout_session_id = Column(String, index=True, nullable=False, unique=True)
+    payment_intent_id = Column(String, index=True, nullable=False, unique=True)
+
+    granted_access_id = Column(UUIDType(binary=False), ForeignKey('billing.granted_access.uuid'), unique=True,
+                               nullable=True)
+    topup_transaction = Column(UUIDType(binary=False), ForeignKey('billing.transaction.uuid'), unique=True,
+                               nullable=True)
+    refund_transaction = Column(UUIDType(binary=False), ForeignKey('billing.transaction.uuid'), unique=True,
+                                nullable=True)
+
+    topup = relationship('Transaction', back_populates='topup_order', foreign_keys=topup_transaction)
+    refund = relationship('Transaction', back_populates='refund_order', foreign_keys=refund_transaction)
+    grant = relationship('GrantedAccess', back_populates='order')
 
 
 class GrantedAccess(DefaultMixin, Base):
@@ -86,13 +99,15 @@ class GrantedAccess(DefaultMixin, Base):
     __table_args__ = {"schema": "billing"}
 
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
-    subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'))
+    subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'), nullable=False)
     granted_at = Column(DateTime, nullable=False, default=datetime.datetime.now())
     available_until = Column(DateTime, nullable=False)
     is_active = Column(Boolean, nullable=False)
+    cost_per_day = Column(Integer, nullable=False)
 
     films = relationship('GrantedFilms', back_populates='grant')
     subscription = relationship('Subscription', back_populates='grants')
+    order = relationship('TransactionOrder', back_populates='grant')
 
 
 class GrantedFilms(DefaultMixin, Base):

@@ -12,9 +12,9 @@ router = APIRouter()
 
 
 @router.get('/{user_uuid}', response_model=Balance)
-def read_user_balance(user_uuid: uuid.UUID, db: Session = Depends(get_db)):
+async def read_user_balance(user_uuid: uuid.UUID, db: Session = Depends(get_db)):
     try:
-        return balance_r.read_user_balance(db=db, user_uuid=user_uuid)
+        return await balance_r.read_user_balance(db=db, user_uuid=user_uuid)
     except NoResultFound:
         raise HTTPException(status_code=404,
                             detail="No balance found for this user or the balance has not yet been calculated")

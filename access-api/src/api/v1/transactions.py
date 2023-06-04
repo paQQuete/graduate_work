@@ -11,13 +11,16 @@ router = APIRouter()
 
 
 @router.post('/', response_model=Transaction)
-def create_trans(transaction: TransactionCreate, db: Session = Depends(get_db)):
-    return transactions_cr.create_transaction(db=db, transaction=transaction)
+async def create_trans(transaction: TransactionCreate, db: Session = Depends(get_db)):
+    try:
+        return await transactions_cr.create_transaction(db=db, transaction=transaction)
+    finally:
+        db.commit()
 
 
 @router.get('/{user_uuid}/pagination', response_model=list[Transaction])
-def read_trans_by_user_pagination(user_uuid: uuid.UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    result = transactions_cr.read_by_user(db=db, user_uuid=user_uuid, skip=skip, limit=limit)
+async def read_trans_by_user_pagination(user_uuid: uuid.UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    result = await transactions_cr.read_by_user(db=db, user_uuid=user_uuid, skip=skip, limit=limit)
     if result:
         return result
     else:
@@ -25,8 +28,8 @@ def read_trans_by_user_pagination(user_uuid: uuid.UUID, skip: int = 0, limit: in
 
 
 @router.get('/{user_uuid}', response_model=list[Transaction])
-def read_trans_by_user_all(user_uuid: uuid.UUID, db: Session = Depends(get_db)):
-    result = transactions_cr.read_all_by_user(db=db, user_uuid=user_uuid)
+async def read_trans_by_user_all(user_uuid: uuid.UUID, db: Session = Depends(get_db)):
+    result = await transactions_cr.read_all_by_user(db=db, user_uuid=user_uuid)
     if result:
         return result
     else:
