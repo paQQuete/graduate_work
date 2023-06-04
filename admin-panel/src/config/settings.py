@@ -23,14 +23,15 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = os.getenv('DEBUG')
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000', '172.18.0.7']
 
 INTERNAL_IPS = [
     '127.0.0.1',
-    '172.21.0.2'
+    '172.18.0.5'
 ]
 
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8080', ]
+CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:8000', 'http://localhost:8000']
 
 #error 500 on open cascade menus (i.e. open the roletype menu on creation any filmwork) if this block on(and django toolbar is working)
 def custom_show_toolbar(request):

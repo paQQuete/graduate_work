@@ -10,4 +10,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_extensions',
     'corsheaders',
+    'django_celery_results',
+    'django_celery_beat',
 ]

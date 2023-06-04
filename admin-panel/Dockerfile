@@ -1,9 +1,6 @@
 FROM python:3.10
 
 WORKDIR /opt/app
-COPY src/ .
-COPY entrypoint.sh entrypoint.sh
-RUN chmod 777 /opt/app/entrypoint.sh
 
 RUN apt -y update \
     && apt -y install netcat && apt -y install python-dev
@@ -15,15 +12,16 @@ ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
 
-COPY run_uwsgi.sh run_uwsgi.sh
-COPY requirements.txt requirements.txt
-COPY src/uwsgi/uwsgi.ini uwsgi.ini
+COPY run_uwsgi.sh /opt/app/run_uwsgi.sh
+COPY requirements.txt /opt/app/requirements.txt
+COPY src/uwsgi/uwsgi.ini /opt/app/uwsgi.ini
 
 RUN mkdir -p /opt/app/static/ \
      && mkdir -p /opt/app/media/ \
      && pip install --upgrade pip \
-     && pip install -r requirements.txt
+     && pip install -r /opt/app/requirements.txt
 
 EXPOSE 8000
-
-ENTRYPOINT ["/opt/app/entrypoint.sh"]
+COPY ./src .
+RUN chmod 777 /opt/app/static/ && chmod 777 /opt/app/media/
+RUN chmod 777 /opt/app/run_uwsgi.sh

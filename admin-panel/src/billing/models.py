@@ -36,8 +36,9 @@ class Subscription(UUIDMixin, TimeStampedMixin):
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='subscriptions_created')
     payment_gw_product_id = models.CharField(verbose_name=_('Actual Product ID on payment gateway'), max_length=255,
                                              null=False, blank=True)
-    payment_gw_price_id = models.CharField(verbose_name=_('Latest Price ID for this subscription plan on payment gateway'),
-                                           max_length=255, null=False, blank=True)
+    payment_gw_price_id = models.CharField(
+        verbose_name=_('Latest Price ID for this subscription plan on payment gateway'),
+        max_length=255, null=False, blank=True)
     films = models.ManyToManyField('movies.Filmwork', through='SubscriptionFilmwork',
                                    related_name='subscriptions_relations')
 
@@ -115,7 +116,7 @@ class FundsOnHold(TransactionMixin, UUIDMixinBilling, TimeStampedMixin, Unmanage
         verbose_name_plural = _('Funds on hold (read-only)')
 
 
-class Balance(UUIDMixinBilling, TimeStampedMixin, UnmanagedMixin):
+class Balance(UUIDMixinBilling, TimeStampedMixin):
     user_uuid = models.UUIDField(verbose_name=_('User id'))
     balance = models.IntegerField(verbose_name=_('User balance'))
     timestamp_offset = models.DateTimeField(verbose_name=_('Actual balance time'))
@@ -125,3 +126,32 @@ class Balance(UUIDMixinBilling, TimeStampedMixin, UnmanagedMixin):
         db_table = 'billing\".\"balance'
         verbose_name = _('User balance')
         verbose_name_plural = _('Users balances')
+
+
+class GrantedAccess(UUIDMixinBilling, TimeStampedMixin):
+    user_uuid = models.UUIDField(verbose_name=_('User id'))
+    subscription_id = models.UUIDField(verbose_name=_('Subscription id'))
+    granted_at = models.DateTimeField(verbose_name=_('Granted at'))
+    available_until = models.DateTimeField(verbose_name=_('Grant available until'))
+    is_active = models.BooleanField(verbose_name=_('Is active grant'))
+    cost_per_day = models.IntegerField(verbose_name=_('Cost this grant per day'))
+
+    class Meta:
+        managed = False
+        db_table = 'billing\".\"granted_access'
+        verbose_name = _('Grant')
+        verbose_name_plural = _('Grants')
+
+
+class GrantedFilms(UUIDMixinBilling, TimeStampedMixin):
+    user_uuid = models.UUIDField(verbose_name=_('User id'))
+    movie_uuid = models.UUIDField(verbose_name=_('Movie id'))
+    granted_at = models.DateTimeField(verbose_name=_('Granted at (same as parent grant)'))
+    grant_uuid = models.UUIDField(verbose_name=_('Grant id'))
+    is_active = models.BooleanField(verbose_name=_('Is active grant for film (same as parent grant'))
+
+    class Meta:
+        managed = False
+        db_table = 'billing\".\"granted_films'
+        verbose_name = _('Grant filmworks')
+        verbose_name_plural = _('Grants filmworks')
