@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 from services import balance_check, subscribe, transactions_cr
-from models.models import GrantedAccess, Transaction, TransactionOrder
+from models.models import GrantedAccess, Transaction, TransactionOrder, HTTPErrorDetails
 from models.schemas.transaction import TransactionCreate
 from models.schemas.transaction import Transaction as TransactionSchema
 from models.schemas.fund_holds import HoldFundsCreate
@@ -22,7 +22,7 @@ async def refund_availability(user_uuid: uuid.UUID, amount: int, db: Session = D
     if await balance_check.aggregate(db=db, user_uuid=user_uuid) >= amount:
         return {'message': 'Refund available'}
     else:
-        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='Refund is not available')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail=HTTPErrorDetails.NOT_ACCEPTABLE.value)
 
 
 @router.get('/grant/{grant_id}/')
@@ -33,7 +33,7 @@ async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
             db=db, grant_access_id=grant_id
         ))
     if amount <= 0:
-        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='This product cannot be refunded')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail=HTTPErrorDetails.NOT_ACCEPTABLE.value)
 
     grant = db.query(GrantedAccess).filter(GrantedAccess.uuid == grant_id).one()
     hold = await transactions_cr.create_hold(db=db, hold_funds=HoldFundsCreate(
@@ -80,9 +80,10 @@ async def refund_transaction(transaction_id: uuid.UUID, db: Session = Depends(ge
     """Refund of a specific transaction, checking if the current balance is enough to refund"""
     transaction = db.query(Transaction).filter(Transaction.uuid == transaction_id).one()
     if transaction.type.value != 'topup':
-        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail='The requested transaction cannot be refunded')
+        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                            detail=HTTPErrorDetails.UNPROCESSABLE_ENTITY.value)
     if await balance_check.aggregate(db=db, user_uuid=transaction.user_uuid) < transaction.cost:
-        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='Refund is not available')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail=HTTPErrorDetails.NOT_ACCEPTABLE.value)
 
     hold = await transactions_cr.create_hold(db=db, hold_funds=HoldFundsCreate(
         user_uuid=transaction.user_uuid,

@@ -8,6 +8,7 @@ from sqlalchemy.exc import NoResultFound
 
 from db.database import get_db
 from services import balance_check, subscribe, transactions_cr
+from models.models import HTTPErrorDetails
 from models.schemas.subscription import GrantedAccess, SimpleGrantAccessCreate
 from models.schemas.fund_holds import HoldFundsCreate
 from models.schemas.transaction import TransactionCreate
@@ -32,8 +33,8 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
             grant = subscribe.grant_access(db=db, grant_create=grant_query)
 
         except NoResultFound:
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-                                detail='Subscribe with provided id not found, purchase not completed')
+            raise HTTPException(status_code=HTTPStatus.NOT_FOUND,
+                                detail=HTTPErrorDetails.NOT_FOUND.value)
 
         else:
             await transactions_cr.create_transaction(db=db, transaction=TransactionCreate(
@@ -48,7 +49,7 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
             db.commit()
 
     else:
-        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='Not enough balance')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail=HTTPErrorDetails.NOT_ACCEPTABLE.value)
 
 
 @router.get('/check/{movie_uuid}/{user_uuid}')

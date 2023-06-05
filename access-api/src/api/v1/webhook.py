@@ -11,7 +11,8 @@ from db.database import get_db
 from core.config import SETTINGS
 from services import subscribe, transactions_cr, order
 from models.schemas.subscription import SimpleGrantAccessCreate
-from models.schemas.transaction import TransactionCreate, Transaction
+from models.schemas.transaction import Transaction
+from models.models import HTTPErrorDetails
 
 router = APIRouter()
 
@@ -26,9 +27,9 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
             data_str, stripe_signature, SETTINGS.STRIPE.STRIPE__WEBHOOK_SECRET
         )
     except ValueError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Invalid payload')
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=HTTPErrorDetails.BAD_REQUEST.value)
     except stripe.error.SignatureVerificationError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Invalid payload')
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=HTTPErrorDetails.BAD_REQUEST.value)
     else:
         if event['type'] == 'checkout.session.completed':
             checkout_type, value1, value2 = event['data']['object']['client_reference_id'].split('_')

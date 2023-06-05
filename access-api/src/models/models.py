@@ -44,6 +44,12 @@ class Currency(enum.Enum):
     USD = 'usd'
 
 
+class HTTPErrorDetails(enum.Enum):
+    NOT_FOUND = 'Not found this entity'
+    NOT_ACCEPTABLE = 'This operation is not available for this entity'
+    UNPROCESSABLE_ENTITY = 'This entity cannot be processed'
+    BAD_REQUEST = 'Invalid data provided'
+
 
 class TransactionBase:
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
