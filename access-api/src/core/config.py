@@ -43,12 +43,17 @@ class Project(BaseSettings):
     PROJECT_PORT: int
 
 
+class Sentry(BaseSettings):
+    SENTRY_ENABLED: bool = False
+    SENTRY_DSN: str = ''
+
+
 class Settings(BaseSettings):
     DB: DatabaseDSN = DatabaseDSN()
     REDIS: RedisDSN = RedisDSN()
     STRIPE: Stripe = Stripe()
     PROJECT: Project = Project()
-    SENTRY: bool = False
+    SENTRY: Sentry = Sentry()
 
     SQLALCHEMY_DATABASE_URL = \
         f"postgresql://{DB.DB_USER}:{DB.DB_PASSWORD}@{DB.POSTGRES_HOST}:{DB.POSTGRES_PORT}/{DB.BILLING_DB}"

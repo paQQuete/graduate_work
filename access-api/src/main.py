@@ -11,9 +11,9 @@ from core.config import SETTINGS
 from core.logger import LOGGING
 from db import redis
 
-if SETTINGS.SENTRY:
+if SETTINGS.SENTRY.SENTRY_ENABLED:
     sentry_sdk.init(
-        dsn="https://d7b229275c864cb9aa5d7a3b7f2ac257@o4504634582302720.ingest.sentry.io/4504662476390400")
+        dsn=SETTINGS.SENTRY.SENTRY_DSN)
 
 app = FastAPI(
     title=SETTINGS.PROJECT.PROJECT_NAME,
