@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
@@ -15,25 +16,23 @@ if SETTINGS.SENTRY.SENTRY_ENABLED:
     sentry_sdk.init(
         dsn=SETTINGS.SENTRY.SENTRY_DSN)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    redis.redis = await aioredis.create_redis_pool(
+        (SETTINGS.REDIS.REDIS_HOST, SETTINGS.REDIS.REDIS_PORT), minsize=10, maxsize=20
+    )
+    yield
+    redis.redis.close()
+    await redis.redis.wait_closed()
+
 app = FastAPI(
     title=SETTINGS.PROJECT.PROJECT_NAME,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
+    lifespan=lifespan
 )
-
-
-@app.on_event('startup')
-async def startup():
-    redis.redis = await aioredis.create_redis_pool(
-        (SETTINGS.REDIS.REDIS_HOST, SETTINGS.REDIS.REDIS_PORT), minsize=10, maxsize=20
-    )
-
-
-@app.on_event('shutdown')
-async def shutdown():
-    redis.redis.close()
-    await redis.redis.wait_closed()
 
 
 app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['transactions'])
