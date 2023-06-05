@@ -1,4 +1,6 @@
 import random
+from http import HTTPStatus
+
 import requests
 
 from conftest import HOST
@@ -11,7 +13,7 @@ def test_show_user_role(login_admin):
     response = requests.get(url=url,
                             headers=headers
                             )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_user_add_role(login_admin, fetch_userid_n_roleid_separate):
@@ -24,7 +26,7 @@ def test_user_add_role(login_admin, fetch_userid_n_roleid_separate):
                              json=data,
                              headers=headers
                              )
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED
 
 
 def test_user_check_role(login_admin):
@@ -34,7 +36,7 @@ def test_user_check_role(login_admin):
     response = requests.get(url=url,
                             headers=headers
                             )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_role_check_user(login_admin, fetch_userid_n_roleid_separate):
@@ -44,7 +46,7 @@ def test_role_check_user(login_admin, fetch_userid_n_roleid_separate):
     response = requests.get(url=url,
                             headers=headers
                             )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_user_role_remove(login_admin, fetch_userid_n_roleid_tuserrole):
@@ -57,4 +59,4 @@ def test_user_role_remove(login_admin, fetch_userid_n_roleid_tuserrole):
                                json=data,
                                headers=headers
                                )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK

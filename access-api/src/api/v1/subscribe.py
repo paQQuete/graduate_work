@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -28,7 +29,7 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
         try:
             grant = subscribe.grant_access(db=db, grant_create=grant_query)
         except:
-            raise HTTPException(status_code=500, detail="Purchase not completed")
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Purchase not completed")
         else:
             await transactions_cr.create_transaction(db=db, transaction=TransactionCreate(
                 user_uuid=grant_query.user_uuid,
@@ -42,7 +43,7 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
             db.commit()
 
     else:
-        raise HTTPException(status_code=406, detail="Not enough balance")
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail="Not enough balance")
 
 
 @router.get('/check/{movie_uuid}/{user_uuid}')

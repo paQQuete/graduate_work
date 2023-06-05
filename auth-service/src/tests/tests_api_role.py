@@ -1,4 +1,6 @@
 import random
+from http import HTTPStatus
+
 import requests
 
 from mimesis import Person
@@ -17,7 +19,7 @@ def test_add_role_valid(login_admin):
                              json=data,
                              headers=headers
                              )
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED
 
 
 def test_delete_role(login_admin, create_role):
@@ -29,7 +31,7 @@ def test_delete_role(login_admin, create_role):
                                json=data,
                                headers=headers
                                )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_show_roles_all(login_admin):
@@ -39,7 +41,7 @@ def test_show_roles_all(login_admin):
     response = requests.get(url=url,
                             headers=headers
                             )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_show_role(login_admin, create_role):
@@ -49,7 +51,7 @@ def test_show_role(login_admin, create_role):
     response = requests.get(url=url,
                             headers=headers
                             )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_update_role(login_admin, create_role):
@@ -66,4 +68,4 @@ def test_update_role(login_admin, create_role):
                             json=data,
                             headers=headers
                             )
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED

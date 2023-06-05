@@ -1,6 +1,7 @@
 import datetime
 import uuid
 from copy import deepcopy
+from http import HTTPStatus
 
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Header, Request
@@ -24,9 +25,9 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
             data_str, stripe_signature, SETTINGS.STRIPE.STRIPE__WEBHOOK_SECRET
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail="Invalid payload")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Invalid payload")
     except stripe.error.SignatureVerificationError as e:
-        raise HTTPException(status_code=400, detail="Invalid payload")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Invalid payload")
     else:
         if event["type"] == 'checkout.session.completed':
             checkout_type, value1, value2 = event['data']['object']['client_reference_id'].split('_')
