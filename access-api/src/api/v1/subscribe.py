@@ -17,6 +17,7 @@ router = APIRouter()
 
 @router.post('/buy/from_balance', response_model=GrantedAccess)
 async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = Depends(get_db)):
+    """Purchasing a subscription using the free funds of the user account"""
     price = subscribe.fetch_price(db=db, subscribe_id=grant_query.subscription_id)
 
     if await balance_check.aggregate(db=db, user_uuid=grant_query.user_uuid) >= price:
@@ -51,4 +52,5 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
 
 @router.get('/check/{movie_uuid}/{user_uuid}')
 async def check_movie_available_for_user(user_uuid: uuid.UUID, movie_uuid: uuid.UUID, db: Session = Depends(get_db)):
+    """Checking if a movie is available to a user"""
     return await subscribe.read_movie_access(db=db, user_uuid=user_uuid, movie_uuid=movie_uuid)

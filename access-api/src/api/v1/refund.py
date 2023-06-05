@@ -3,12 +3,10 @@ import uuid
 from http import HTTPStatus
 
 import stripe
-from aioredis import Redis
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from db.database import get_db
-from db.redis import get_redis
 from services import balance_check, subscribe, transactions_cr
 from models.models import GrantedAccess, Transaction, TransactionOrder
 from models.schemas.transaction import TransactionCreate
@@ -20,6 +18,7 @@ router = APIRouter()
 
 @router.post('/request')
 async def refund_availability(user_uuid: uuid.UUID, amount: int, db: Session = Depends(get_db)):
+    """Checks the availability of refunding the amount from the balance. Should be deprecated"""
     if await balance_check.aggregate(db=db, user_uuid=user_uuid) >= amount:
         return {'message': 'Refund available'}
     else:
@@ -28,12 +27,7 @@ async def refund_availability(user_uuid: uuid.UUID, amount: int, db: Session = D
 
 @router.get('/grant/{grant_id}/')
 async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
-    '''
-    Partial refund for a subscription, in accordance with the days spent
-    :param grant_id:
-    :param db:
-    :return:
-    '''
+    """Refunds for unused days of a purchased subscription, using Stripe"""
     amount = await subscribe.get_refund_amount_subscribe(
         db=db, grant_access_id=grant_id, days=await subscribe.check_active_days_left(
             db=db, grant_access_id=grant_id
@@ -83,12 +77,7 @@ async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
 
 @router.get('/transaction/{transaction_id}')
 async def refund_transaction(transaction_id: uuid.UUID, db: Session = Depends(get_db)):
-    '''
-    Refund of a specific transaction, checking if the current balance is enough to refund
-    :param transaction_id:
-    :param db:
-    :return:
-    '''
+    """Refund of a specific transaction, checking if the current balance is enough to refund"""
     transaction = db.query(Transaction).filter(Transaction.uuid == transaction_id).one()
     if transaction.type.value != 'topup':
         raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail='The requested transaction cannot be refunded')
