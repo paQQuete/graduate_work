@@ -3,13 +3,13 @@ import uuid
 import json
 
 import stripe
-from aioredis import Redis
+from redis import Redis
 from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from db.database import get_db
-from db.redis import get_redis
+from db.redis_inj import get_redis
 from core.config import SETTINGS
 from models.models import Currency
 from services import subscribe
@@ -23,7 +23,7 @@ async def buy_from_card(subscribe_id: uuid.UUID, user_id: uuid.UUID = None, db: 
                         redis: Redis = Depends(get_redis)):
     """Buy subscription for user using Stripe checkout"""
     redis_key = f'buy_{subscribe_id}_{user_id}'
-    cached_data = await redis.get(key=redis_key)
+    cached_data = await redis.get(redis_key)
     if not cached_data:
         price_id = subscribe.get_price_id(db=db, subscribe_id=subscribe_id)
         checkout_session = stripe.checkout.Session.create(
@@ -36,7 +36,7 @@ async def buy_from_card(subscribe_id: uuid.UUID, user_id: uuid.UUID = None, db: 
             success_url=f"""{SETTINGS.PROJECT_URL}/api/v1/payment/success/?cache={redis_key}""",
             cancel_url=f"""{SETTINGS.PROJECT_URL}/api/v1/payment/cancel/?cache={redis_key}"""
         )
-        await redis.set(key=redis_key, value=json.dumps({
+        await redis.set(redis_key, value=json.dumps({
             'checkout_id': checkout_session.id,
             'checkout_url': checkout_session.url,
             'subscribe_id': str(subscribe_id),
@@ -54,7 +54,7 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
                         redis: Redis = Depends(get_redis)):
     """Top-up user balance using Stripe checkout"""
     redis_key = f'topup_{user_id}_{amount}'
-    cached_data = await redis.get(key=redis_key)
+    cached_data = await redis.get(redis_key)
 
     if not cached_data:
         stripe_price = stripe.Price.create(
@@ -72,7 +72,7 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
             success_url=f"""{SETTINGS.PROJECT_URL}/api/v1/payment/success/?cache={redis_key}""",
             cancel_url=f"""{SETTINGS.PROJECT_URL}/api/v1/payment/cancel/?cache={redis_key}"""
         )
-        await redis.set(key=redis_key, value=json.dumps({
+        await redis.set(redis_key, value=json.dumps({
             'checkout_id': checkout_session.id,
             'checkout_url': checkout_session.url,
             'amount': amount,
@@ -90,7 +90,7 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
 async def success(cache: str = None, redis: Redis = Depends(get_redis)):
     """Callback endpoint for users browser, for return user browser after Stripe checkout session. Don't call this
     directly"""
-    await redis.delete(key=cache)
+    await redis.delete(cache)
     return f"Payment completed successfully"
 
 
@@ -98,5 +98,5 @@ async def success(cache: str = None, redis: Redis = Depends(get_redis)):
 async def cancel(cache: str = None, redis: Redis = Depends(get_redis)):
     """Callback endpoint for users browser, for return user browser after Stripe checkout session. Don't call this
     directly"""
-    await redis.delete(key=cache)
+    await redis.delete(cache)
     return f"Payment canceled successfully"
