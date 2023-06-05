@@ -5,35 +5,27 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 import sentry_sdk
-import aioredis
+from redis import asyncio as aioredis
 
 from api.v1 import transactions, balance, refund, subscribe, payment, webhook
 from core.config import SETTINGS
 from core.logger import LOGGING
-from db import redis
+from db import redis_inj
 
 if SETTINGS.SENTRY.SENTRY_ENABLED:
     sentry_sdk.init(
         dsn=SETTINGS.SENTRY.SENTRY_DSN)
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis.redis = await aioredis.create_redis_pool(
-        (SETTINGS.REDIS.REDIS_HOST, SETTINGS.REDIS.REDIS_PORT), minsize=10, maxsize=20
-    )
-    yield
-    redis.redis.close()
-    await redis.redis.wait_closed()
+redis_inj.redis_pool = aioredis.ConnectionPool(
+    host=SETTINGS.REDIS.REDIS_HOST, port=SETTINGS.REDIS.REDIS_PORT, db=0, max_connections=200)
 
 app = FastAPI(
     title=SETTINGS.PROJECT.PROJECT_NAME,
     docs_url='/api/openapi',
     openapi_url='/api/openapi.json',
     default_response_class=ORJSONResponse,
-    lifespan=lifespan
-)
 
+)
 
 app.include_router(transactions.router, prefix='/api/v1/transactions', tags=['transactions'])
 app.include_router(balance.router, prefix='/api/v1/balance', tags=['balance'])
