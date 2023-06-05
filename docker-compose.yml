@@ -30,7 +30,7 @@ services:
 
   nginx:
     container_name: nginx
-    image: nginx:latest
+    image: nginx:1.23.3
     volumes:
       - ./nginx-admin/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx-admin/configs:/etc/nginx/conf.d:ro
