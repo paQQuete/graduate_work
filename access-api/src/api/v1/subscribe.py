@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoResultFound
 
 from db.database import get_db
 from services import balance_check, subscribe, transactions_cr
@@ -28,8 +29,10 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
             ))
         try:
             grant = subscribe.grant_access(db=db, grant_create=grant_query)
-        except:
-            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Purchase not completed")
+
+        except NoResultFound:
+            raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Subscribe with provided id not found, purchase not completed")
+
         else:
             await transactions_cr.create_transaction(db=db, transaction=TransactionCreate(
                 user_uuid=grant_query.user_uuid,
@@ -47,8 +50,5 @@ async def buy_from_balance(grant_query: SimpleGrantAccessCreate, db: Session = D
 
 
 @router.get('/check/{movie_uuid}/{user_uuid}')
-async def check_movie_available_for_user(user_uuid: uuid.UUID, movie_uuid: uuid.UUID,db: Session = Depends(get_db)):
+async def check_movie_available_for_user(user_uuid: uuid.UUID, movie_uuid: uuid.UUID, db: Session = Depends(get_db)):
     return await subscribe.read_movie_access(db=db, user_uuid=user_uuid, movie_uuid=movie_uuid)
-
-
-
