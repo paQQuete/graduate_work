@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from db.redis import get_redis
 from core.config import SETTINGS
+from models.models import Currency
 from services import subscribe
 
 router = APIRouter()
@@ -56,7 +57,7 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
     if not cached_data:
         stripe_price = stripe.Price.create(
             unit_amount=amount * 100,
-            currency='usd',
+            currency=Currency.USD.value,
             product=SETTINGS.STRIPE.STRIPE__BALANCE_PROD_ID
         )
         checkout_session = stripe.checkout.Session.create(
