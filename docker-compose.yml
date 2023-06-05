@@ -7,6 +7,8 @@ services:
       - postgres_data-billing:/var/lib/postgresql/data
     env_file:
       - admin-panel/.env.example
+    ports:
+      - "5432:5432"
 
   admin-panel:
     container_name: admin-panel
@@ -39,6 +41,7 @@ services:
     depends_on:
       - admin-panel
       - access-api
+      - flower
     ports:
       - "80:80"
 

@@ -28,8 +28,8 @@ async def buy_from_card(subscribe_id: uuid.UUID, user_id: uuid.UUID = None, db: 
         price_id = subscribe.get_price_id(db=db, subscribe_id=subscribe_id)
         checkout_session = stripe.checkout.Session.create(
             line_items=[
-                {"price": price_id,
-                 "quantity": 1},
+                {'price': price_id,
+                 'quantity': 1},
             ],
             mode='payment',
             client_reference_id=redis_key,
@@ -64,8 +64,8 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
         )
         checkout_session = stripe.checkout.Session.create(
             line_items=[
-                {"price": stripe_price.id,
-                 "quantity": 1},
+                {'price': stripe_price.id,
+                 'quantity': 1},
             ],
             mode='payment',
             client_reference_id=redis_key,

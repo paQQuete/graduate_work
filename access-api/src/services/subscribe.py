@@ -57,12 +57,12 @@ async def grant_access(db: Session, grant_create: SimpleGrantAccessCreate):
 
 
 async def read_movie_access(db: Session, user_uuid: uuid.UUID, movie_uuid: uuid.UUID) -> bool:
-    '''
+    """
     Check movie available for user
     :param db: sqlalchemy.orm.Session instance
     :param user_uuid: user uuid
     :return: yes or not
-    '''
+    """
     query = db.query(GrantedFilms).filter(
         GrantedFilms.movie_uuid == movie_uuid, GrantedFilms.user_uuid == user_uuid, GrantedFilms.is_active == True
     ).all()

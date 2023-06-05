@@ -52,8 +52,8 @@ class TransactionBase:
 
 
 class Transaction(DefaultMixin, TransactionBase, Base):
-    __tablename__ = "transaction"
-    __table_args__ = {"schema": "billing"}
+    __tablename__ = 'transaction'
+    __table_args__ = {'schema': 'billing'}
 
     type = Column(Enum(TypesEnum), index=True, nullable=False)
 
@@ -64,8 +64,8 @@ class Transaction(DefaultMixin, TransactionBase, Base):
 
 
 class Balance(DefaultMixin, Base):
-    __tablename__ = "balance"
-    __table_args__ = {"schema": "billing"}
+    __tablename__ = 'balance'
+    __table_args__ = {'schema': 'billing'}
 
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     balance = Column(Integer, nullable=False)
@@ -73,15 +73,15 @@ class Balance(DefaultMixin, Base):
 
 
 class FundsOnHold(DefaultMixin, TransactionBase, Base):
-    __tablename__ = "funds_hold"
-    __table_args__ = {"schema": "billing"}
+    __tablename__ = 'funds_hold'
+    __table_args__ = {'schema': 'billing'}
 
     type = Column(Enum(TypesEnumHolds), index=True, nullable=False)
 
 
 class TransactionOrder(DefaultMixin, Base):
-    __tablename__ = "trans_order"
-    __table_args__ = {"schema": "billing"}
+    __tablename__ = 'trans_order'
+    __table_args__ = {'schema': 'billing'}
 
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     checkout_session_id = Column(String, index=True, nullable=False, unique=True)
@@ -100,8 +100,8 @@ class TransactionOrder(DefaultMixin, Base):
 
 
 class GrantedAccess(DefaultMixin, Base):
-    __tablename__ = "granted_access"
-    __table_args__ = {"schema": "billing"}
+    __tablename__ = 'granted_access'
+    __table_args__ = {'schema': 'billing'}
 
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     subscription_id = Column(UUIDType(binary=False), ForeignKey('content.subscribe.id'), nullable=False)
@@ -116,10 +116,10 @@ class GrantedAccess(DefaultMixin, Base):
 
 
 class GrantedFilms(DefaultMixin, Base):
-    __tablename__ = "granted_films"
+    __tablename__ = 'granted_films'
     __table_args__ = (
         Index('ix_billing_granted_films_movie_user_uuids', 'movie_uuid', 'user_uuid'),
-        {"schema": "billing"},
+        {'schema': 'billing'},
     )
 
     movie_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
@@ -133,8 +133,8 @@ class GrantedFilms(DefaultMixin, Base):
 
 
 class SubscriptionFilmwork(Base):
-    __tablename__ = "subscription_filmwork"
-    __table_args__ = {"schema": "content"}
+    __tablename__ = 'subscription_filmwork'
+    __table_args__ = {'schema': 'content'}
 
     id = Column(UUIDType(binary=False), primary_key=True)
     created_at = Column(DateTime)
@@ -143,7 +143,7 @@ class SubscriptionFilmwork(Base):
 
     def _disallow_modification(self, name, *args, **kwargs):
         if not name.startswith('_') and not name in ['metadata']:
-            raise NotImplementedError("Cannot modify a read-only instance")
+            raise NotImplementedError('Cannot modify a read-only instance')
         else:
             super().__setattr__(name, *args, **kwargs)
 
@@ -152,8 +152,8 @@ class SubscriptionFilmwork(Base):
 
 
 class Subscription(DefaultReadOnlyMixin, Base):
-    __tablename__ = "subscribe"
-    __table_args__ = {"schema": "content"}
+    __tablename__ = 'subscribe'
+    __table_args__ = {'schema': 'content'}
 
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
@@ -165,11 +165,11 @@ class Subscription(DefaultReadOnlyMixin, Base):
     payment_gw_price_id = Column(String)
 
     grants = relationship('GrantedAccess', back_populates='subscription')
-    filmworks = relationship("Filmwork", secondary=SubscriptionFilmwork.__table__, back_populates='subscribes')
+    filmworks = relationship('Filmwork', secondary=SubscriptionFilmwork.__table__, back_populates='subscribes')
 
     def _disallow_modification(self, name, *args, **kwargs):
         if not name.startswith('_') and not name in ['metadata']:
-            raise NotImplementedError("Cannot modify a read-only instance")
+            raise NotImplementedError('Cannot modify a read-only instance')
         else:
             super().__setattr__(name, *args, **kwargs)
 
@@ -178,8 +178,8 @@ class Subscription(DefaultReadOnlyMixin, Base):
 
 
 class Filmwork(DefaultReadOnlyMixin, Base):
-    __tablename__ = "film_work"
-    __table_args__ = {"schema": "content"}
+    __tablename__ = 'film_work'
+    __table_args__ = {'schema': 'content'}
 
     title = Column(String)
     description = Column(String)
@@ -188,11 +188,11 @@ class Filmwork(DefaultReadOnlyMixin, Base):
     type = Column(String)
     file_path = Column(String)
 
-    subscribes = relationship("Subscription", secondary=SubscriptionFilmwork.__table__, back_populates='filmworks')
+    subscribes = relationship('Subscription', secondary=SubscriptionFilmwork.__table__, back_populates='filmworks')
 
     def _disallow_modification(self, name, *args, **kwargs):
         if not name.startswith('_') and not name in ['metadata']:
-            raise NotImplementedError("Cannot modify a read-only instance")
+            raise NotImplementedError('Cannot modify a read-only instance')
         else:
             super().__setattr__(name, *args, **kwargs)
 

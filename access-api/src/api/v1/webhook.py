@@ -26,11 +26,11 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
             data_str, stripe_signature, SETTINGS.STRIPE.STRIPE__WEBHOOK_SECRET
         )
     except ValueError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Invalid payload")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Invalid payload')
     except stripe.error.SignatureVerificationError as e:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Invalid payload")
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Invalid payload')
     else:
-        if event["type"] == 'checkout.session.completed':
+        if event['type'] == 'checkout.session.completed':
             checkout_type, value1, value2 = event['data']['object']['client_reference_id'].split('_')
             if checkout_type == 'buy':
                 subscribe_id, user_uuid = value1, value2
@@ -71,4 +71,4 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
                                   )
             db.commit()
 
-    return {"msg": "success"}
+    return {'msg': 'success'}

@@ -22,7 +22,7 @@ async def refund_availability(user_uuid: uuid.UUID, amount: int, db: Session = D
     if await balance_check.aggregate(db=db, user_uuid=user_uuid) >= amount:
         return {'message': 'Refund available'}
     else:
-        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail="Refund is not available")
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='Refund is not available')
 
 
 @router.get('/grant/{grant_id}/')
