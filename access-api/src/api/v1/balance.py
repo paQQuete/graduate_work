@@ -14,6 +14,7 @@ router = APIRouter()
 
 @router.get('/{user_uuid}', response_model=Balance)
 async def read_user_balance(user_uuid: uuid.UUID, db: Session = Depends(get_db)):
+    """Read last saved value for user balance"""
     try:
         return await balance_r.read_user_balance(db=db, user_uuid=user_uuid)
     except NoResultFound:

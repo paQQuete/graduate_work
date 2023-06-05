@@ -18,6 +18,7 @@ router = APIRouter()
 
 @router.post('/')
 async def webhook_success_payment(data: Request, stripe_signature: str = Header(None), db: Session = Depends(get_db)):
+    """Webhook for handling asynchronous payment events. Called only by Stripe, do not use directly"""
     data = await data.body()
     data_str = data.decode()
     try:

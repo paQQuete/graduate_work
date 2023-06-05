@@ -4,7 +4,7 @@ import json
 
 import stripe
 from aioredis import Redis
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -21,6 +21,7 @@ stripe.api_key = SETTINGS.STRIPE.STRIPE__API_KEY
 @router.get('/card/{subscribe_id}/')
 async def buy_from_card(subscribe_id: uuid.UUID, user_id: uuid.UUID = None, db: Session = Depends(get_db),
                         redis: Redis = Depends(get_redis)):
+    """Buy subscription for user using Stripe checkout"""
     redis_key = f'buy_{subscribe_id}_{user_id}'
     cached_data = await redis.get(key=redis_key)
     if not cached_data:
@@ -51,6 +52,7 @@ async def buy_from_card(subscribe_id: uuid.UUID, user_id: uuid.UUID = None, db: 
 @router.get('/topup/{user_id}/')
 async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = Depends(get_db),
                         redis: Redis = Depends(get_redis)):
+    """Top-up user balance using Stripe checkout"""
     redis_key = f'topup_{user_id}_{amount}'
     cached_data = await redis.get(key=redis_key)
 
@@ -86,11 +88,15 @@ async def topup_balance(user_id: uuid.UUID, amount: int = None, db: Session = De
 
 @router.get('/success/')
 async def success(cache: str = None, redis: Redis = Depends(get_redis)):
+    """Callback endpoint for users browser, for return user browser after Stripe checkout session. Don't call this
+    directly"""
     await redis.delete(key=cache)
     return f"Payment completed successfully"
 
 
 @router.get('/cancel/')
 async def cancel(cache: str = None, redis: Redis = Depends(get_redis)):
+    """Callback endpoint for users browser, for return user browser after Stripe checkout session. Don't call this
+    directly"""
     await redis.delete(key=cache)
     return f"Payment canceled successfully"
