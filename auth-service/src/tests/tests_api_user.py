@@ -1,4 +1,6 @@
 import random
+from http import HTTPStatus
+
 import requests
 
 from mimesis import Person
@@ -19,7 +21,7 @@ def test_signup_valid_data():
                              json=data,
                              headers=headers
                              )
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED
 
 
 def test_signin_valid_data():
@@ -43,7 +45,7 @@ def test_logout(login):
                              json=data,
                              headers=headers
                              )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_logout_all(login):
@@ -53,7 +55,7 @@ def test_logout_all(login):
     response = requests.post(url=url,
                              headers=headers
                              )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_change_password(login):
@@ -81,7 +83,7 @@ def test_change_password(login):
                                       headers=headers,
                                       json=data_rollback
                                       )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_access(login):
@@ -91,7 +93,7 @@ def test_access(login):
     response = requests.post(url=url,
                              headers=headers,
                              )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_get_refresh(login):
@@ -103,4 +105,4 @@ def test_get_refresh(login):
                              json=data,
                              headers=headers
                              )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK

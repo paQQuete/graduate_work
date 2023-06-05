@@ -40,6 +40,11 @@ class TypesEnumHolds(enum.Enum):
     refund = 'refund'
 
 
+class Currency(enum.Enum):
+    USD = 'usd'
+
+
+
 class TransactionBase:
     user_uuid = Column(UUIDType(binary=False), index=True, nullable=False)
     cost = Column(Integer, nullable=False)

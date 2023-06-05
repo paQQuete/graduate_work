@@ -1,6 +1,7 @@
 # Проектная работа: диплом
 
 Авторы [@paqquete](https://github.com/paQQuete), [@pilikp](https://github.com/pilikp)
+Ссылка на репозиторий (https://github.com/paQQuete/graduate_work/)
 
 ## Запуск проекта
 

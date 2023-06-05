@@ -1,4 +1,5 @@
 import uuid
+from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -24,7 +25,7 @@ async def read_trans_by_user_pagination(user_uuid: uuid.UUID, skip: int = 0, lim
     if result:
         return result
     else:
-        raise HTTPException(status_code=404, detail="No transactions found for this user")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="No transactions found for this user")
 
 
 @router.get('/{user_uuid}', response_model=list[Transaction])
@@ -33,7 +34,7 @@ async def read_trans_by_user_all(user_uuid: uuid.UUID, db: Session = Depends(get
     if result:
         return result
     else:
-        raise HTTPException(status_code=404, detail="No transactions found for this user")
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="No transactions found for this user")
 
 
 

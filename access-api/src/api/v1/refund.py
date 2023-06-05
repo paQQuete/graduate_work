@@ -1,5 +1,6 @@
 import datetime
 import uuid
+from http import HTTPStatus
 
 import stripe
 from aioredis import Redis
@@ -22,7 +23,7 @@ async def refund_availability(user_uuid: uuid.UUID, amount: int, db: Session = D
     if await balance_check.aggregate(db=db, user_uuid=user_uuid) >= amount:
         return {'message': 'Refund available'}
     else:
-        raise HTTPException(status_code=406, detail="Refund is not available")
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail="Refund is not available")
 
 
 @router.get('/grant/{grant_id}/')
@@ -38,7 +39,7 @@ async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
             db=db, grant_access_id=grant_id
         ))
     if amount <= 0:
-        raise HTTPException(status_code=406, detail='This product cannot be refunded')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='This product cannot be refunded')
 
     grant = db.query(GrantedAccess).filter(GrantedAccess.uuid == grant_id).one()
     hold = await transactions_cr.create_hold(db=db, hold_funds=HoldFundsCreate(
@@ -54,7 +55,7 @@ async def refund_subscribe(grant_id: uuid.UUID, db: Session = Depends(get_db)):
             reason='requested_by_customer'
         )
     except stripe.error.StripeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
     else:
         db.query(GrantedAccess).filter(GrantedAccess.uuid == grant_id).update({
             'available_until': datetime.datetime.now(),
@@ -90,9 +91,9 @@ async def refund_transaction(transaction_id: uuid.UUID, db: Session = Depends(ge
     '''
     transaction = db.query(Transaction).filter(Transaction.uuid == transaction_id).one()
     if transaction.type.value != 'topup':
-        raise HTTPException(status_code=422, detail='The requested transaction cannot be refunded')
+        raise HTTPException(status_code=HTTPStatus.UNPROCESSABLE_ENTITY, detail='The requested transaction cannot be refunded')
     if await balance_check.aggregate(db=db, user_uuid=transaction.user_uuid) < transaction.cost:
-        raise HTTPException(status_code=406, detail='Refund is not available')
+        raise HTTPException(status_code=HTTPStatus.NOT_ACCEPTABLE, detail='Refund is not available')
 
     hold = await transactions_cr.create_hold(db=db, hold_funds=HoldFundsCreate(
         user_uuid=transaction.user_uuid,
@@ -108,7 +109,7 @@ async def refund_transaction(transaction_id: uuid.UUID, db: Session = Depends(ge
             reason='requested_by_customer'
         )
     except stripe.error.StripeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
     else:
         ref_newtrans_id = uuid.uuid4()
         await transactions_cr.create_transaction(db=db, transaction=TransactionSchema(

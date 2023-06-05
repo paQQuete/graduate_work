@@ -14,24 +14,24 @@ from .auth_service import admin_required, token_validation
 user_role_bp = Blueprint('user_role', __name__, url_prefix='/user_role')
 
 
-@user_role_bp.errorhandler(404)
+@user_role_bp.errorhandler(HTTPStatus.NOT_FOUND)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), HTTPStatus.NOT_FOUND)
 
 
-@user_role_bp.errorhandler(400)
+@user_role_bp.errorhandler(HTTPStatus.BAD_REQUEST)
 def bad_request(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.BAD_REQUEST)
 
 
-@user_role_bp.errorhandler(403)
+@user_role_bp.errorhandler(HTTPStatus.FORBIDDEN)
 def forbidden(error):
     return make_response(jsonify({'error': 'Request data is invalid'}), HTTPStatus.FORBIDDEN)
 
 
 def body_validate(rrequest):
     if not rrequest.json or 'user_id' not in rrequest.json or 'role_id' not in rrequest.json:
-        abort(400)
+        abort(HTTPStatus.BAD_REQUEST)
 
 
 @user_role_bp.route('/user_role_add', methods=['POST'])
