@@ -48,6 +48,7 @@ class Settings(BaseSettings):
     REDIS: RedisDSN = RedisDSN()
     STRIPE: Stripe = Stripe()
     PROJECT: Project = Project()
+    SENTRY: bool = False
 
     SQLALCHEMY_DATABASE_URL = \
         f"postgresql://{DB.DB_USER}:{DB.DB_PASSWORD}@{DB.POSTGRES_HOST}:{DB.POSTGRES_PORT}/{DB.BILLING_DB}"
