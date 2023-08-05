@@ -6,7 +6,7 @@ COPY requirements.txt ./requirements.txt
 COPY entrypoint.sh ./entrypoint.sh
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-RUN apt -y update && apt -y install netcat
+RUN apt -y update && apt -y install netcat-traditional
 
 EXPOSE 8000
 COPY src ./

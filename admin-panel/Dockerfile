@@ -3,7 +3,7 @@ FROM python:3.10
 WORKDIR /opt/app
 
 RUN apt -y update \
-    && apt -y install netcat && apt -y install python-dev
+    && apt -y install netcat-traditional && apt -y install python-dev-is-python3
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
