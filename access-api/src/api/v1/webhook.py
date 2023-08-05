@@ -63,7 +63,9 @@ async def webhook_success_payment(data: Request, stripe_signature: str = Header(
                 ))
                 grant = None
 
+#добавил создание uuid, но не проверено (вспоминай созвон)
             await order.set_order(db=db,
+                                  uuid=uuid.uuid4(),
                                   user_uuid=user_uuid,
                                   checkout_session_id=event['data']['object']['id'],
                                   payment_intent_id=event['data']['object']['payment_intent'],
